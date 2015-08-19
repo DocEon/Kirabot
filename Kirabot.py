@@ -7,6 +7,18 @@ import re
 from random import randrange
 
 
+
+# fileinput.filelineno()
+quoteDatabase = [""]
+f = open("quotes.txt", 'r')
+currentIndex = 0
+for line in f:
+    if line.strip() == "":
+      if quoteDatabase[len(quoteDatabase)-1] != "":
+        quoteDatabase.append("")
+    else:
+      quoteDatabase[len(quoteDatabase)-1] += "\n" + line
+
 ### IRC stuff
 # irc-related constants
 server = "irc.arcti.ca"
@@ -18,15 +30,6 @@ lastActiveChannel = ""
 # make stuff that lets you talk to IRC
 irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
-
-# fileinput.filelineno()
-quoteDatabase = ["quote1"]
-f = open("quotes.txt", 'r')
-for line in f:
-    lineNum = len(quoteDatabase)
-    quoteDatabase[lineNum] = line
-
-
   
 def connectAndLoop():
 # Connect to the irc channel and go into an infinite loop waiting for input and processing it.
@@ -88,7 +91,7 @@ def processInput(text):
   # TODO: proper-die-roll-mode: if user is registered as wanting proper die rolls, sort, highlight, etc.
   # (register yana*, anybody who asks)
   # ignore/refuse ramc
-  
+  global channel
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
   firstAndRest = getFirstWordAndRest(text)
@@ -124,7 +127,6 @@ def processInput(text):
   elif firstWord == 'wz':
   	irc.send("MODE "+channel +" +o "+ userName + "\n")
   elif firstWord == 'goto':
-    global channel
     sendMsg("I was in " +channel+ ", Fin.")
     channel = restOfText
     sendMsg("... but now I'm here in " +channel+ ", Fin. I liked it better over there.")
@@ -171,7 +173,6 @@ def processInput(text):
 
 def sendMsg(line):
   # send message to irc channel
-  irc.send('PRIVMSG '+channel+' :'+line+' \r\n')
   maxlen = 420 # max. length of message to send. Approximately size where it cuts off 
   # (428 in tests, but I suspect it depends on the prefixes like "PRIVMSG ..." etc.)
   explicit_lines = line.split('\n')
