@@ -116,8 +116,14 @@ def processInput(text):
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
   elif firstWord == 'Kiraquote':
-    quoteIndex = int(restOfText)
-    sendMsg(quoteDatabase[quoteIndex])
+    if restOfText == "":
+      quoteIndex = randrange(len(quoteDatabase))
+      sendMsg("Quote #" + str(quoteIndex) + ":")
+      sendMsg(quoteDatabase[quoteIndex])
+    else:
+      quoteIndex = int(restOfText)
+      sendMsg("Quote #" + str(quoteIndex) + ":")
+      sendMsg(quoteDatabase[quoteIndex])
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
