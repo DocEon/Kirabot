@@ -23,7 +23,7 @@ irc = ssl.wrap_socket(irc_C)
 quoteDatabase = ["quote1"]
 f = open("quotes.txt", 'r')
 for line in f:
-    lineNum = len(quoteDatabase)-1
+    lineNum = len(quoteDatabase)
     quoteDatabase[lineNum] = line
 
 
@@ -112,6 +112,9 @@ def processInput(text):
   # respond to message as needed:
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
+  elif firstWord == 'Kiraquote':
+    quoteIndex = int(restOfText)
+    sendMsg(quoteDatabase[quoteIndex])
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
