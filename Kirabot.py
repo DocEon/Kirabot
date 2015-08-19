@@ -19,7 +19,15 @@ lastActiveChannel = ""
 irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
 
+# fileinput.filelineno()
+quoteDatabase = ["quote1"]
+f = open("quotes.txt", 'r')
+for line in f:
+    lineNum = len(quoteDatabase)-1
+    quoteDatabase[lineNum] = line
 
+
+  
 def connectAndLoop():
 # Connect to the irc channel and go into an infinite loop waiting for input and processing it.
 
@@ -104,12 +112,6 @@ def processInput(text):
   # respond to message as needed:
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
-  elif firstword =='KiraQuote':
-    f = open(filename, 'r')
-    for line in f:
-        print line
-    f.close()
-
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
