@@ -115,6 +115,8 @@ def processInput(text):
   # respond to message as needed:
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
+  elif firstWord == 'Kirasay':
+    sendMsg(restOfText)
   elif firstWord == 'Kiraquote':
     if restOfText == "":
       quoteIndex = randrange(len(quoteDatabase))
@@ -131,40 +133,48 @@ def processInput(text):
     quoteIndex = 0
     searchString = restOfText
     searchNumber = 1
-    # Checks to see if we're looking for a second or third incidence of a substring
-    # If we are, puts the substring in searchString and the number into searchNumber.
-    #if restOfText.find("[") != -1:
-    #  restOfText.split("[")
-    #  searchString = restOfText[0]
-    #  restOfText.split("]")
-    #  searchNumber = int(restOfText[0])
-    while True:
-      if quoteDatabase[quoteIndex].find(searchString) != -1:
+    matchIndices = []
+# here is where we are broken. fix this! it won't build the match lists. we're also getting errors from the matchIndices thing.
+    while quoteIndex != len(quoteDatabase)-1:
+      if (quoteDatabase[quoteIndex].lower()).find(searchString.lower()) != -1:
         if searchNumber == 1:
-          sendMsg("String \"" + searchString + "\" located in quote #" + str(quoteIndex) + ":\n")
+          # sendMsg("String \"" + searchString + "\" located in quote #" + str(quoteIndex) + ":\n")
           int(quoteIndex)
-          sendMsg(quoteDatabase[quoteIndex])
-          break
-        else:
-          searchNumber = searchNumber - 1
-      elif quoteIndex == len(quoteDatabase)-1:
-        sendMsg("Quote not found.")
-        break 
+          matchIndices.append(quoteIndex)
+          #sendMsg(quoteDatabase[quoteIndex])
+          quoteIndex = quoteIndex + 1
       else:
         quoteIndex = quoteIndex + 1
+    if len(matchIndices) == 0:
+      sendMsg("No matches found.")
+      #works
+    else:
+    # build match list:
+      strMatches = "#"
+      first = True
+      for i in matchIndices:
+        if first:
+          strMatches+=str(i)
+          first = False
+        else:
+          strMatches+=(", #" + str(i))
+      strMatches+=(".\n")
+      sendMsg("Found match(es) in quotes " + strMatches)
+
 
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
-    sendMsg('Ken, '+userName+' sucks the cocks!')
+    sendMsg('>:|')
   elif firstWord == 'jetfuel':
    	sendMsg('Don\'t be silly. Jet fuel can\'t melt steel beams.')
   elif firstWord == 'wz':
-  	irc.send("MODE "+channel +" +o "+ userName + "\n")
+  	# TODO if the person is already an op, don't give it to them.
+    irc.send("MODE "+channel +" +o "+ userName + "\n")
   elif firstWord == 'goto':
-    sendMsg("I was in " +channel+ ", Fin.")
+    sendMsg("MUTE command sent to Kira @ " + channel+ ". \"t(- - t)\"")
     channel = restOfText
-    sendMsg("... but now I'm here in " +channel+ ", Fin. I liked it better over there.")
+    sendMsg("Unmuted in "+ channel+", sir!")
     #todo - give the bot memory of the channel it was in - some kind of log list would be cool. making the bot log would also be really cool
     #and probably doable - file IO can't be impossible.
   elif firstWord == 'sort':
