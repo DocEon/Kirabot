@@ -8,8 +8,6 @@ from random import randrange
 
 
 ### IRC stuff
-
-
 # irc-related constants
 server = "irc.arcti.ca"
 port = 6697
@@ -92,19 +90,25 @@ def processInput(text):
   firstWord = ""
   restOfText = ""
   sortedRoll = ""
-  sloppyCode = ""
+  # This variable preserves restOfText from having to go through the split function, which is important because we use it later.
+  preserver = ""
   
   if len(firstAndRest) > 0:  # must have found a message to the channel
     firstWord = firstAndRest[0]
     
     if len(firstAndRest) > 1: # there is more than one word in the message
       restOfText = firstAndRest[1].strip()
-      sloppyCode = restOfText
-      sortedRoll = sloppyCode.split()[0]
+      preserver = restOfText
+      sortedRoll = preserver.split()[0]
 
   # respond to message as needed:
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
+  elif firstword =='KiraQuote':
+    f = open(filename, 'r')
+    for line in f:
+        print line
+    f.close()
 
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
