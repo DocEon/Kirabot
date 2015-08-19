@@ -124,6 +124,35 @@ def processInput(text):
       quoteIndex = int(restOfText)
       sendMsg("Quote #" + str(quoteIndex) + ":")
       sendMsg(quoteDatabase[quoteIndex])
+  elif firstWord == 'Kirasearch':
+    # Loops through the quote array searching for a user-input string. When it finds the string,
+    # it prints out that quote.
+    # TODO: 'searchString[2]' prints out the second incidence of the  string.
+    quoteIndex = 0
+    searchString = restOfText
+    searchNumber = 1
+    # Checks to see if we're looking for a second or third incidence of a substring
+    # If we are, puts the substring in searchString and the number into searchNumber.
+    #if restOfText.find("[") != -1:
+    #  restOfText.split("[")
+    #  searchString = restOfText[0]
+    #  restOfText.split("]")
+    #  searchNumber = int(restOfText[0])
+    while True:
+      if quoteDatabase[quoteIndex].find(searchString) != -1:
+        if searchNumber == 1:
+          sendMsg("String \"" + searchString + "\" located in quote #" + str(quoteIndex) + ":\n")
+          int(quoteIndex)
+          sendMsg(quoteDatabase[quoteIndex])
+          break
+        else:
+          searchNumber = searchNumber - 1
+      elif quoteIndex == len(quoteDatabase)-1:
+        sendMsg("Quote not found.")
+        break 
+      else:
+        quoteIndex = quoteIndex + 1
+
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
