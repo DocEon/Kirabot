@@ -2,13 +2,14 @@
 
 import sys
 import socket
-import ssl # TODO: try without ssl
 import time
 import re
 from random import randrange
 
 
 ### global variables (with defaults that will likely be overridden)
+
+
 quoteDatabase = [""]
 server = "irc.efnet.org"
 port = 6667
@@ -16,8 +17,12 @@ password = ""
 lastActiveChannel = ""
 channel = "#Mage"
 botnick = "Kirabot"
+irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
+
 
 ### Quotes database
+
+
 def loadQuotes():
   global quoteDatabase
   f = open("quotes.txt", 'r')
@@ -29,31 +34,53 @@ def loadQuotes():
       else:
         quoteDatabase[len(quoteDatabase)-1] += "\n" + line
 
+
 ### IRC stuff
-# set irc-related constants
-# TODO: move into main
-# TODO: oh dear god, separate into readable code
-channel = "#"+sys.argv[1] if len(sys.argv) > 1 else raw_input('What channel would you like to join?\n')
-botnick = sys.argv[2] if len(sys.argv) > 2 else raw_input('And what nickname?\n')
-# make stuff that lets you talk to IRC
-irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
-#irc = ssl.wrap_socket(irc_C)
+
+
+def connectAndJoin():
+  # connect to irc, then join the channel requested upon seeing welcome message
+  # of the format:
+  # ":irc.eversible.com 001 yanabot :Welcome to the EFNet Internet Relay Chat Network yanabot""
   
-def connectAndLoop():
-  # Connect to the irc channel and go into an infinite loop waiting for input and processing it.
-  # TODO: separate connect and loop; switch on seeing "welcome..."" message
-  # ":irc.eversible.com 001 yanabot :Welcome to the EFNet Internet Relay Chat Network yanabot"
-  # irc.setblocking(False)  # sets socket as non-blocking (other things can use it, I guess) but breaks... something so screw it.
   print "Establishing connection to [%s]" % (server)
   # Connect
   irc.connect((server, port))
-  # irc.send("PASS %s\n" % (password))  # not bothering with passwords
   irc.send("USER "+ botnick +" "+ botnick +" "+ botnick +" :testbot\n")
   irc.send("NICK "+ botnick +"\n")
-  irc.send("PRIVMSG nickserv :iNOOPE\r\n")    #auth
-  irc.send("JOIN "+ channel +"\n")
+  irc.send("PRIVMSG nickserv :iNOOPE\r\n") #auth
   
-  while True:  # TODO: have a boolean variable 
+  connected = False
+  while not connected:
+    # TODO: factor out the try/recieve/except block into a function.
+    try:
+      text=irc.recv(2040) # wait for the next bit of input from the IRC server. Limit to 2040 characters.
+      # (the rest would stay in the buffer and get processed afterwards, I think)
+      if text.strip() != '':
+        print text
+      if text.find('To connect type /QUOTE PONG') != -1:
+        # TODO: handle not getting this gracefully.
+        msg = '/QUOTE PONG' + text.split('To connect type /QUOTE PONG') [1] + '\r\n'
+        msg = 'PONG' + text.split('To connect type /QUOTE PONG')[1] + '\r\n'
+        irc.send(msg)
+        print msg
+      if text.find('Welcome') != -1: # Note: for some reason the match fails on the 'EFNet' part of the expected welcome message.
+        # leaving it at just 'Welcome'. Nothing can go wrong.
+        print "JOINING"
+        irc.send("JOIN "+ channel +"\n")
+        connected = True
+    
+    except Exception as e:
+      # this prints the error message whenever something throws an exception.
+      print str(e) # TODO: self-subscribe users to admin stuff, like getting the error message in IRC?
+      # TODO: print line? (sys.exc_info())
+      continue # don't crash on exception; keep going
+
+
+def inputLoop():
+  # An infinite loop waiting for input and processing it.
+  
+  while True:
     #time.sleep(2)  # this would wait 2 seconds before waiting for the next input each time, but it's a bit silly to do that. 
     # TODO: find list index out of bounds error
     try:
@@ -61,15 +88,6 @@ def connectAndLoop():
       # (the rest would stay in the buffer and get processed afterwards, I think)
       if text.strip() != '':
         print text
-      
-      if text.find('To connect type /QUOTE PONG') != -1:
-        # TODO: handle not getting this gracefully.
-        msg = '/QUOTE PONG' + text.split('To connect type /QUOTE PONG') [1] + '\r\n'
-        msg = 'PONG' + text.split('To connect type /QUOTE PONG')[1] + '\r\n'
-        irc.send(msg)
-        print "PONGING"
-        print msg
-        irc.send("JOIN "+ channel +"\n") # TODO: do all the joining and stuff after pong connection is established
       
       # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
       if text.find('PING') != -1: # if there is a "PING" anywhere in the text
@@ -269,9 +287,30 @@ def rollDice(num, sides):
   return rolls
 
 
+### main
+
+
 def main():
+  global channel, botnick
+  # process command-line arguments
+  # TODO: look into better argument syntax?
+  
+  if len(sys.argv) > 1:
+    channel = '#' + sys.argv[1]
+  else:
+    channel = raw_input('What channel would you like to join?\n')
+  
+  if len(sys.argv) > 2:
+    botnick = sys.argv[2]
+  else:
+    botnick = raw_input('And what nickname?\n')
+    
+  # load data from file(s)
   loadQuotes()
-  connectAndLoop()
+  
+  # start bot
+  connectAndJoin()
+  inputLoop()
 
 
 if __name__ == "__main__":
