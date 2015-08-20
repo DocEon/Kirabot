@@ -1,5 +1,6 @@
 #!/usr/local/bin/python
 
+import sys
 import socket
 import ssl # TODO: try without ssl
 import time
@@ -23,8 +24,9 @@ for line in f:
 # irc-related constants
 server = "irc.arcti.ca"
 port = 6697
-channel = raw_input('What channel would you like to join?\n')
-botnick = raw_input('And what nickname?\n')
+# TODO: oh dear god, separate into readable code
+channel = "#"+sys.argv[1] if len(sys.argv) > 1 else raw_input('What channel would you like to join?\n')
+botnick = sys.argv[2] if len(sys.argv) > 2 else raw_input('And what nickname?\n')
 password = ""
 lastActiveChannel = ""
 # make stuff that lets you talk to IRC
@@ -93,20 +95,14 @@ def processInput(text):
   restOfText = ""
   allWords = message.split()
   
-  sortedRoll = ""
-  # This variable preserves restOfText from having to go through the split function, which is important because we use it later.
-  preserver = "" # TODO: ??
-  
   if len(firstAndRest) > 0:  # must have found a message to the channel
     firstWord = firstAndRest[0]
     # TODO: move to sorted logic
     if len(firstAndRest) > 1: # there is more than one word in the message
       restOfText = firstAndRest[1].strip()
-      preserver = restOfText 
-      sortedRoll = preserver.split()[0]
-
-
+  
   # respond to message as needed:
+  # TODO: command to always sort user's dice
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
   elif firstWord == 'Kirasay':
@@ -153,8 +149,7 @@ def processInput(text):
           strMatches+=(", #" + str(i))
       strMatches+=(".\n")
       sendMsg("Found match(es) in quotes " + strMatches)
-
-
+  
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
@@ -184,7 +179,15 @@ def tryRollingDice(message, user, sort=False):
       # TODO: put back "SORTED"?
     words = message.split()
     roll = words[0]
+    diff = 5 # assume diff5 by default
     explanation = ' '.join(words[1:]) # the rest of the words, joined back by spaces
+    if len(words) > 1:
+      maybeDiff = words[1]
+      m = re.match(r'diff([0-9]+)', maybeDiff)
+      if m:
+        diff = int(m.group(1))
+        explanation = ' '.join(words[2:]) # don't include diffN in the beginning of the explanation text
+    # TODO: use diff to calculate number of successes and add to explanation.
     sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice))
 
 # TODO: wrap irc.send in a helper function that also echoes it to the console.
