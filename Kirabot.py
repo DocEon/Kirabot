@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 
 import socket
-import ssl
+import ssl # TODO: try without ssl
 import time
 import re
 from random import randrange
@@ -32,8 +32,8 @@ irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
   
 def connectAndLoop():
-# Connect to the irc channel and go into an infinite loop waiting for input and processing it.
-
+  # Connect to the irc channel and go into an infinite loop waiting for input and processing it.
+  # TODO: separate connect and loop; switch on seeing "welcome..."" message
   # irc.setblocking(False)  # sets socket as non-blocking (other things can use it, I guess) but breaks... something so screw it.
   print "Establishing connection to [%s]" % (server)
   # Connect
@@ -71,7 +71,7 @@ def connectAndLoop():
     except Exception as e:
       # this is just in case something within the 'try' block throws an exception.
       # not sure what would do that. might be unnecessary.
-		  print str(e)
+		  print str(e) # TODO: is this actually the error message? self-subscribe users to admin stuff?
 		  continue # don't crash on exception; keep going
 
       
@@ -102,7 +102,7 @@ def processInput(text):
   restOfText = ""
   sortedRoll = ""
   # This variable preserves restOfText from having to go through the split function, which is important because we use it later.
-  preserver = ""
+  preserver = "" # TODO: ??
   
   if len(firstAndRest) > 0:  # must have found a message to the channel
     firstWord = firstAndRest[0]
@@ -197,10 +197,10 @@ def processInput(text):
         msg += ']'
         sendMsg(msg)
   else: # try to find a die roll
+      # TODO: separate dice printing into function. Also, make it shorter. also, fix indentation.
       (num, sides) = matchDice(firstWord)
       if num > 0:
         dice = rollDice(num, sides)
-        # TODO: functions for 'classic', 'proper' modes of display?
         sumStr = str(sum(dice))
         redux = firstWord  # the text to display/repeat with the dice roll response
         if restOfText != '':
@@ -215,6 +215,7 @@ def processInput(text):
         msg += ']'
         sendMsg(msg)
 
+# TODO: wrap irc.send in a helper function that also echoes it to the console.
 
 def sendMsg(line):
   # send message to irc channel
@@ -236,7 +237,6 @@ def getName(line):
 def getMsg(line):
   # returns the contents of a message to the channel
   # assumes format "PRIVMSG #channel :[message]"
-  # TODO: account for not finding the substring
   # So right now, it takes the input after the colon and returns it: i.e. return m[1]
   # what if instead I did m=line.split('PRIVMSG '); that'd make m[1] into "#channel :outputoutput"
   # and then if I were to do lastActiveChannel = m.split()[0];
