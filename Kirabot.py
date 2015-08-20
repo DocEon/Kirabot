@@ -112,6 +112,7 @@ def processInput(text):
       preserver = restOfText
       sortedRoll = preserver.split()[0]
 
+
   # respond to message as needed:
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
@@ -134,7 +135,6 @@ def processInput(text):
     searchString = restOfText
     searchNumber = 1
     matchIndices = []
-# here is where we are broken. fix this! it won't build the match lists. we're also getting errors from the matchIndices thing.
     while quoteIndex != len(quoteDatabase)-1:
       if (quoteDatabase[quoteIndex].lower()).find(searchString.lower()) != -1:
         if searchNumber == 1:
@@ -283,6 +283,7 @@ def rollDice(num, sides):
   for i in range(num):
     rolls.append(randrange(sides)+1)
   return rolls
+
 
 # should really be main
 connectAndLoop()
