@@ -7,31 +7,37 @@ import time
 import re
 from random import randrange
 
-# TODO: command line argument for default testing nick/channel
 
-# fileinput.filelineno()
+### global variables (with defaults that will likely be overridden)
 quoteDatabase = [""]
-f = open("quotes.txt", 'r')
-currentIndex = 0
-for line in f:
-    if line.strip() == "":
-      if quoteDatabase[len(quoteDatabase)-1] != "":
-        quoteDatabase.append("")
-    else:
-      quoteDatabase[len(quoteDatabase)-1] += "\n" + line
+server = "irc.efnet.org"
+port = 6667
+password = ""
+lastActiveChannel = ""
+channel = "#Mage"
+botnick = "Kirabot"
+
+### Quotes database
+def loadQuotes():
+  global quoteDatabase
+  f = open("quotes.txt", 'r')
+  currentIndex = 0
+  for line in f:
+      if line.strip() == "":
+        if quoteDatabase[len(quoteDatabase)-1] != "":
+          quoteDatabase.append("")
+      else:
+        quoteDatabase[len(quoteDatabase)-1] += "\n" + line
 
 ### IRC stuff
-# irc-related constants
-server = "irc.arcti.ca"
-port = 6697
+# set irc-related constants
+# TODO: move into main
 # TODO: oh dear god, separate into readable code
 channel = "#"+sys.argv[1] if len(sys.argv) > 1 else raw_input('What channel would you like to join?\n')
 botnick = sys.argv[2] if len(sys.argv) > 2 else raw_input('And what nickname?\n')
-password = ""
-lastActiveChannel = ""
 # make stuff that lets you talk to IRC
-irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
-irc = ssl.wrap_socket(irc_C)
+irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
+#irc = ssl.wrap_socket(irc_C)
   
 def connectAndLoop():
   # Connect to the irc channel and go into an infinite loop waiting for input and processing it.
@@ -46,17 +52,18 @@ def connectAndLoop():
   irc.send("NICK "+ botnick +"\n")
   irc.send("PRIVMSG nickserv :iNOOPE\r\n")    #auth
   irc.send("JOIN "+ channel +"\n")
-
+  
   while True:  # TODO: have a boolean variable 
     #time.sleep(2)  # this would wait 2 seconds before waiting for the next input each time, but it's a bit silly to do that. 
-
+    # TODO: find list index out of bounds error
     try:
       text=irc.recv(2040) # wait for the next bit of input from the IRC server. Limit to 2040 characters.
       # (the rest would stay in the buffer and get processed afterwards, I think)
       if text.strip() != '':
         print text
       
-      if text.find('To connect type /QUOTE PONG') != -1: # if there is a "PING" anywhere in the text
+      if text.find('To connect type /QUOTE PONG') != -1:
+        # TODO: handle not getting this gracefully.
         msg = '/QUOTE PONG' + text.split('To connect type /QUOTE PONG') [1] + '\r\n'
         msg = 'PONG' + text.split('To connect type /QUOTE PONG')[1] + '\r\n'
         irc.send(msg)
@@ -70,15 +77,15 @@ def connectAndLoop():
         print "PONGING"
       
       processInput(text) # actually process the input
-
+    
     except Exception as e:
-      # this is just in case something within the 'try' block throws an exception.
-      # not sure what would do that. might be unnecessary.
-		  print str(e) # TODO: is this actually the error message? self-subscribe users to admin stuff?
-		  continue # don't crash on exception; keep going
+      # this prints the error message whenever something throws an exception.
+      print str(e) # TODO: self-subscribe users to admin stuff, like getting the error message in IRC?
+      # TODO: print line? (sys.exc_info())
+      continue # don't crash on exception; keep going
 
-      
-### Everything else
+
+### Actual Bot Logic
 
 
 def processInput(text):
@@ -170,6 +177,7 @@ def processInput(text):
   else: # try to find a dice roll
     tryRollingDice(message, userName)
 
+
 def tryRollingDice(message, user, sort=False):
   (num, sides) = matchDice(message)
   if num > 0:
@@ -190,7 +198,9 @@ def tryRollingDice(message, user, sort=False):
     # TODO: use diff to calculate number of successes and add to explanation.
     sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice))
 
+
 # TODO: wrap irc.send in a helper function that also echoes it to the console.
+
 
 def sendMsg(line):
   # send message to irc channel
@@ -203,12 +213,13 @@ def sendMsg(line):
       msg = el[0:cutoff]
       el = el[cutoff:]
       irc.send('PRIVMSG '+channel+' :'+msg+' \r\n')
-  
+
+
 def getName(line):
   # assumes format :[name]!blahblah
   return line[1:line.find('!')] 
 
-  
+
 def getMsg(line):
   # returns the contents of a message to the channel
   # assumes format "PRIVMSG #channel :[message]"
@@ -227,25 +238,18 @@ def getMsg(line):
     return n[1]
   else:
     return ""
-  
+
+
 # TODO: get nth word?
-  
-  
-def getFirstWord(line):
-  # returns the first word of a message to the channel.
-  # same assumption as getMsg
-  # TODO: why did I make this? I'm not using it.
-  msg = getMsg(line)
-  return msg.split()[0]
-  
-  
+
+
 def getFirstWordAndRest(line):
   # same assumption as getMsg
   # NOTE: this means it assumes that line is a whole irc line, not an arbitrary string.
   # i.e. PRIVMSG etc.
   return getMsg(line).split(None,1)
-  
-  
+
+
 def matchDice(word):
   # returns tuple with number and sides of dice to roll, if the word is of the format 1d10
   # otherwise returns (0,0)
@@ -256,8 +260,8 @@ def matchDice(word):
     return (num, sides)
   else:
     return (0,0)
-   
-   
+
+
 def rollDice(num, sides):
   rolls = []
   for i in range(num):
@@ -265,5 +269,12 @@ def rollDice(num, sides):
   return rolls
 
 
-# should really be main
-connectAndLoop()
+def main():
+  loadQuotes()
+  connectAndLoop()
+
+
+if __name__ == "__main__":
+  main()
+# this means that main() is run only if kirabot.py was called directly rather than imported.
+# otherwise, it is treated as a library, essentially.
