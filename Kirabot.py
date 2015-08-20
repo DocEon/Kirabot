@@ -1,12 +1,13 @@
 #!/usr/local/bin/python
 
+import sys
 import socket
-import ssl
+import ssl # TODO: try without ssl
 import time
 import re
 from random import randrange
 
-
+# TODO: command line argument for default testing nick/channel
 
 # fileinput.filelineno()
 quoteDatabase = [""]
@@ -23,8 +24,9 @@ for line in f:
 # irc-related constants
 server = "irc.arcti.ca"
 port = 6697
-channel = raw_input('What channel would you like to join?\n')
-botnick = raw_input('And what nickname?\n')
+# TODO: oh dear god, separate into readable code
+channel = "#"+sys.argv[1] if len(sys.argv) > 1 else raw_input('What channel would you like to join?\n')
+botnick = sys.argv[2] if len(sys.argv) > 2 else raw_input('And what nickname?\n')
 password = ""
 lastActiveChannel = ""
 # make stuff that lets you talk to IRC
@@ -32,8 +34,9 @@ irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
   
 def connectAndLoop():
-# Connect to the irc channel and go into an infinite loop waiting for input and processing it.
-
+  # Connect to the irc channel and go into an infinite loop waiting for input and processing it.
+  # TODO: separate connect and loop; switch on seeing "welcome..."" message
+  # ":irc.eversible.com 001 yanabot :Welcome to the EFNet Internet Relay Chat Network yanabot"
   # irc.setblocking(False)  # sets socket as non-blocking (other things can use it, I guess) but breaks... something so screw it.
   print "Establishing connection to [%s]" % (server)
   # Connect
@@ -71,7 +74,7 @@ def connectAndLoop():
     except Exception as e:
       # this is just in case something within the 'try' block throws an exception.
       # not sure what would do that. might be unnecessary.
-		  print str(e)
+		  print str(e) # TODO: is this actually the error message? self-subscribe users to admin stuff?
 		  continue # don't crash on exception; keep going
 
       
@@ -79,18 +82,7 @@ def connectAndLoop():
 
 
 def processInput(text):
-# process a line of text from the IRC server.
-
-  # TODO: replacement: hang out in different while loop, checking that a nick is in a channel; 
-  # when it leaves, come in;
-  # if it joins (and you are in replacement mode, but in this loop now), leave.
-  
-  # TODO: if message(text) contains my nickname, "must be a typo."
-  # TODO: if message(text) contains 'correct' nickname, "that's totally me"
-  
-  # TODO: proper-die-roll-mode: if user is registered as wanting proper die rolls, sort, highlight, etc.
-  # (register yana*, anybody who asks)
-  # ignore/refuse ramc
+  # process a line of text from the IRC server.
   global channel
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
@@ -98,22 +90,19 @@ def processInput(text):
   userName = getName(text)
   
   # initialize helper variables for responding to message:
+  message = getMsg(text)
   firstWord = ""
   restOfText = ""
-  sortedRoll = ""
-  # This variable preserves restOfText from having to go through the split function, which is important because we use it later.
-  preserver = ""
+  allWords = message.split()
   
   if len(firstAndRest) > 0:  # must have found a message to the channel
     firstWord = firstAndRest[0]
-    
+    # TODO: move to sorted logic
     if len(firstAndRest) > 1: # there is more than one word in the message
       restOfText = firstAndRest[1].strip()
-      preserver = restOfText
-      sortedRoll = preserver.split()[0]
-
-
+  
   # respond to message as needed:
+  # TODO: command to always sort user's dice
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
   elif firstWord == 'Kirasay':
@@ -160,8 +149,7 @@ def processInput(text):
           strMatches+=(", #" + str(i))
       strMatches+=(".\n")
       sendMsg("Found match(es) in quotes " + strMatches)
-
-
+  
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
@@ -178,43 +166,31 @@ def processInput(text):
     #todo - give the bot memory of the channel it was in - some kind of log list would be cool. making the bot log would also be really cool
     #and probably doable - file IO can't be impossible.
   elif firstWord == 'sort':
-      (num, sides) = matchDice(sortedRoll)
-      if num > 0:
-        dice = rollDice(num, sides)
-        dice.sort()
-        # TODO: functions for 'classic', 'proper' modes of display?
-        sumStr = str(sum(dice))
-        redux = sortedRoll  # the text to display/repeat with the dice roll response
-        if restOfText != '':
-          redux = restOfText
-        msg = 'SORTED: '+ userName+', '+redux+': '+sumStr+' ['+sortedRoll+'='
-        first = True
-        for die in dice:
-          if not first:
-            msg += ','
-          first = False
-          msg += str(die)
-        msg += ']'
-        sendMsg(msg)
-  else: # try to find a die roll
-      (num, sides) = matchDice(firstWord)
-      if num > 0:
-        dice = rollDice(num, sides)
-        # TODO: functions for 'classic', 'proper' modes of display?
-        sumStr = str(sum(dice))
-        redux = firstWord  # the text to display/repeat with the dice roll response
-        if restOfText != '':
-          redux = restOfText
-        msg = userName+', '+redux+': '+sumStr+' ['+firstWord+'='
-        first = True
-        for die in dice:
-          if not first:
-            msg += ','
-          first = False
-          msg += str(die)
-        msg += ']'
-        sendMsg(msg)
+    tryRollingDice(restOfText, userName, True)
+  else: # try to find a dice roll
+    tryRollingDice(message, userName)
 
+def tryRollingDice(message, user, sort=False):
+  (num, sides) = matchDice(message)
+  if num > 0:
+    dice = rollDice(num, sides)
+    if sort:
+      dice.sort()
+      # TODO: put back "SORTED"?
+    words = message.split()
+    roll = words[0]
+    diff = 5 # assume diff5 by default
+    explanation = ' '.join(words[1:]) # the rest of the words, joined back by spaces
+    if len(words) > 1:
+      maybeDiff = words[1]
+      m = re.match(r'diff([0-9]+)', maybeDiff)
+      if m:
+        diff = int(m.group(1))
+        explanation = ' '.join(words[2:]) # don't include diffN in the beginning of the explanation text
+    # TODO: use diff to calculate number of successes and add to explanation.
+    sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice))
+
+# TODO: wrap irc.send in a helper function that also echoes it to the console.
 
 def sendMsg(line):
   # send message to irc channel
@@ -236,7 +212,7 @@ def getName(line):
 def getMsg(line):
   # returns the contents of a message to the channel
   # assumes format "PRIVMSG #channel :[message]"
-  # TODO: account for not finding the substring
+  
   # So right now, it takes the input after the colon and returns it: i.e. return m[1]
   # what if instead I did m=line.split('PRIVMSG '); that'd make m[1] into "#channel :outputoutput"
   # and then if I were to do lastActiveChannel = m.split()[0];
@@ -247,7 +223,7 @@ def getMsg(line):
   if len(m)>1:
     n = m[1].split(' :')
     # probably unnecessary, but I'm not sure if it breaks something, so I'm leaving it here.
-    lastActiveChannel = n[0]
+    lastActiveChannel = n[0] # TODO: pass around channel/person from message
     return n[1]
   else:
     return ""
@@ -258,11 +234,15 @@ def getMsg(line):
 def getFirstWord(line):
   # returns the first word of a message to the channel.
   # same assumption as getMsg
+  # TODO: why did I make this? I'm not using it.
   msg = getMsg(line)
   return msg.split()[0]
   
   
 def getFirstWordAndRest(line):
+  # same assumption as getMsg
+  # NOTE: this means it assumes that line is a whole irc line, not an arbitrary string.
+  # i.e. PRIVMSG etc.
   return getMsg(line).split(None,1)
   
   
