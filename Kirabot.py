@@ -88,9 +88,10 @@ def processInput(text):
   userName = getName(text)
   
   # initialize helper variables for responding to message:
+  message = getMsg(text)
   firstWord = ""
   restOfText = ""
-  allWords = text.split()
+  allWords = message.split()
   
   sortedRoll = ""
   # This variable preserves restOfText from having to go through the split function, which is important because we use it later.
@@ -170,21 +171,21 @@ def processInput(text):
     #todo - give the bot memory of the channel it was in - some kind of log list would be cool. making the bot log would also be really cool
     #and probably doable - file IO can't be impossible.
   elif firstWord == 'sort':
-      (num, sides) = matchDice(sortedRoll)
-      if num > 0:
-        dice = rollDice(num, sides)
-        dice.sort()
-        # TODO: put back "SORTED"?
-        printDice(userName, restOfText, firstWord, dice)
-  else: # try to find a die roll
-      # TODO: separate dice printing into function. Also, make it shorter. also, fix indentation.
-      (num, sides) = matchDice(firstWord)
-      if num > 0:
-        dice = rollDice(num, sides)
-        printDice(userName, restOfText, firstWord, dice)
+    tryRollingDice(restOfText, userName, True)
+  else: # try to find a dice roll
+    tryRollingDice(message, userName)
 
-def printDice(user, text, roll, dice):
-  sendMsg(user + ', ' + text + ' ' + roll + ': ' + str(dice))
+def tryRollingDice(message, user, sort=False):
+  (num, sides) = matchDice(message)
+  if num > 0:
+    dice = rollDice(num, sides)
+    if sort:
+      dice.sort()
+      # TODO: put back "SORTED"?
+    words = message.split()
+    roll = words[0]
+    explanation = ' '.join(words[1:]) # the rest of the words, joined back by spaces
+    sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice))
 
 # TODO: wrap irc.send in a helper function that also echoes it to the console.
 
@@ -236,6 +237,9 @@ def getFirstWord(line):
   
   
 def getFirstWordAndRest(line):
+  # same assumption as getMsg
+  # NOTE: this means it assumes that line is a whole irc line, not an arbitrary string.
+  # i.e. PRIVMSG etc.
   return getMsg(line).split(None,1)
   
   
