@@ -136,17 +136,17 @@ def processInput(text):
   # TODO: check end of kira-related message(s) for "in [channel]" modifier, send response to that channel if it exists.
   
   if firstWord == 'hay':
-    sendMsg(userName+', hay v:')
+    sendMsg(userName+', hay v:', chan)
   elif firstWord == 'Kirasay':
-    sendMsg(restOfText)
+    sendMsg(restOfText, chan)
   elif firstWord == 'Kiraquote':
-    kiraquote(restOfText)
+    kiraquote(restOfText, chan)
   elif firstWord == 'Kirasearch':
-    kirasearch(restOfText)
+    kirasearch(restOfText, chan)
   elif firstWord == 'Kirabot,':
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
-    sendMsg('>:|')
+    sendMsg('>:|', chan)
   elif firstWord == 'jetfuel':
    	sendMsg('Don\'t be silly. Jet fuel can\'t melt steel beams.')
   elif firstWord == 'wz':
@@ -160,9 +160,9 @@ def processInput(text):
     # and probably doable - file IO can't be impossible.
     # TODO: move this out into a separate function if it gets any longer.
   elif firstWord == 'sort':
-    tryRollingDice(restOfText, userName, True)
+    tryRollingDice(restOfText, userName, chan, True)
   else: # try to find a dice roll
-    tryRollingDice(message, userName)
+    tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
 
 
@@ -193,13 +193,17 @@ def getName(line):
 
 
 def getMsg(line):
-  # returns the contents of a messagee, and the channel(or user) it was send to
+  # returns the contents of a message, and the channel(or user) it was send to
   # assumes format "PRIVMSG #channel :[message]"
   # or "PRIVMSG user :[message]"
   m = line.split('PRIVMSG ')
   if len(m)>1:
     n = m[1].split(' :')
-    return (n[0], n[1]) # channel and message text
+    msg = n[1]
+    chan = n[0]
+    if chan[0]!= '#': # for PM, get the sender. Otherwise the bot just starts talking to itself.
+      chan = getName(line)
+    return (chan, msg)
   else:
     return ("", "")
 
@@ -233,7 +237,7 @@ def rollDice(num, sides):
   return rolls
 
 
-def tryRollingDice(message, user, sort=False):
+def tryRollingDice(message, user, chan=None, sort=False):
   (num, sides) = matchDice(message)
   if num > 0:
     dice = rollDice(num, sides)
@@ -252,13 +256,13 @@ def tryRollingDice(message, user, sort=False):
         explanation = ' '.join(words[2:]) # don't include diffN in the beginning of the explanation text
     # TODO: use diff to calculate number of successes and add to explanation.
     # right here. diff is already the correct thing.
-    sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice))
+    sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice), chan)
 
 
 ## Kirabot functionality
 
 
-def kirasearch(searchString):
+def kirasearch(searchString, chan):
   # Loops through the quote array searching for a user-input string. When it finds the string,
   # it prints out that quote.
   # TODO: 'searchString[2]' prints out the second incidence of the string.
@@ -276,7 +280,7 @@ def kirasearch(searchString):
     else:
       quoteIndex = quoteIndex + 1
   if len(matchIndices) == 0:
-    sendMsg("No matches found.")
+    sendMsg("No matches found.", chan)
     #works
   else:
   # build match list:
@@ -289,18 +293,18 @@ def kirasearch(searchString):
       else:
         strMatches+=(", #" + str(i))
     strMatches+=(".\n")
-    sendMsg("Found match(es) in quotes " + strMatches)
+    sendMsg("Found match(es) in quotes " + strMatches, chan)
 
 
-def kiraquote(restOfText):
+def kiraquote(restOfText, chan):
   if restOfText == "":
     quoteIndex = randrange(len(quoteDatabase))
-    sendMsg("Quote #" + str(quoteIndex) + ":")
-    sendMsg(quoteDatabase[quoteIndex])
+    sendMsg("Quote #" + str(quoteIndex) + ":", chan)
+    sendMsg(quoteDatabase[quoteIndex], chan)
   else:
     quoteIndex = int(restOfText) # TODO: handle strange input gracefully (e.g. "Kiraquote 5 please" "Kiraquote Foo")
-    sendMsg("Quote #" + str(quoteIndex) + ":")
-    sendMsg(quoteDatabase[quoteIndex])
+    sendMsg("Quote #" + str(quoteIndex) + ":", chan)
+    sendMsg(quoteDatabase[quoteIndex], chan)
 
 
 ### main
