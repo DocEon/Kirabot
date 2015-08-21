@@ -16,7 +16,6 @@ quoteDatabase = [""]
 server = "irc.arcti.ca"
 port = 6697
 password = ""
-lastActiveChannel = ""
 channel = "#Mage"
 botnick = "Kirabot"
 irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
