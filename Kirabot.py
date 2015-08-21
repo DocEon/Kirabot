@@ -1,5 +1,6 @@
 #!/usr/local/bin/python
 
+
 import sys
 import ssl
 import socket
@@ -20,6 +21,7 @@ channel = "#Mage"
 botnick = "Kirabot"
 irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
+
 
 ### Quotes database
 
@@ -49,43 +51,43 @@ def tryGettingInput(callback):
       print text
     # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
     if text.find('PING') != -1: # if there is a "PING" anywhere in the text
-      irc.send('PONG ' + text.split()[1] + '\r\n')
-      print "PONGING"
+      sendIrcCommand('PONG ' + text.split()[1] + '\r\n')
+      # TODO: what's with the 'PONG AUTH' when first connecting connecting? debug.
     return callback(text) # actually process the input
   except Exception as e:
     # this prints the error message whenever something throws an exception.
-    print str(e) # TODO: self-subscribe users to admin stuff, like getting the error message in IRC?
-    # TODO: print line number of exception? stack trace? (sys.exc_info())
+    (exType, value, traceback) = sys.exc_info()
+    print str(e)
+    print 'on line '+str(traceback.tb_lineno)
+    sendMsg('Oops, I derped') # TODO(yanamal): user preference for "PM me error messages"?
+    sendMsg(str(e))
 
 
 def respondToConnectionCommands(text):
   # see if the text contains commands for the bot to respond to in order to complete the connection
   # respond as necessary.
+  # look for PONG requestes and welcome messages of the format:
+  # ":irc.eversible.com 001 yanabot :Welcome to the EFNet Internet Relay Chat Network yanabot""
   connected = False
   if text.find('To connect type /QUOTE PONG') != -1:
-    msg = 'PONG' + text.split('To connect type /QUOTE PONG')[1] + '\r\n'
-    irc.send(msg)
-    print msg
+    sendIrcCommand('PONG' + text.split('To connect type /QUOTE PONG')[1] + '\r\n')
   
   if text.find('Welcome') != -1: # Note: for some reason the match fails on the 'EFNet' part of the expected welcome message.
     # leaving it at just 'Welcome'. Nothing can go wrong.
-    print "JOINING"
-    irc.send("PRIVMSG nickserv :iNOOPE\r\n") #auth
-    irc.send("JOIN "+ channel +"\n")
+    sendIrcCommand("PRIVMSG nickserv :iNOOPE\r\n") #auth
+    sendIrcCommand("JOIN "+ channel +"\n")
     connected = True
   return connected
 
 
 def connectAndJoin():
-  # connect to irc, then join the channel requested upon seeing welcome message
-  # of the format:
-  # ":irc.eversible.com 001 yanabot :Welcome to the EFNet Internet Relay Chat Network yanabot""
+  # connect to irc, then join the channel requested.
   
   print "Establishing connection to [%s]" % (server)
   # Connect
   irc.connect((server, port))
-  irc.send("USER "+ botnick +" "+ botnick +" "+ botnick +" :testbot\n")
-  irc.send("NICK "+ botnick +"\n")
+  sendIrcCommand("USER "+ botnick +" "+ botnick +" "+ botnick +" :testbot\n")
+  sendIrcCommand("NICK "+ botnick +"\n")
   
   connected = False
   while not connected:
@@ -95,11 +97,13 @@ def connectAndJoin():
 def inputLoop():
   # An infinite loop waiting for input and processing it.
   while True:
-    # TODO: find list index out of bounds error
     tryGettingInput(processInput)
 
 
-# TODO: wrap irc.send in a helper function that also echoes the output to the console.
+def sendIrcCommand(command):
+  # send IRC command and also print it to the console
+  irc.send(command)
+  print ' > '+command
 
 
 ### Actual Bot Logic
@@ -114,7 +118,7 @@ def processInput(text):
   userName = getName(text)
   
   # initialize helper variables for responding to message:
-  message = getMsg(text)
+  (chan, message) = getMsg(text)
   firstWord = ""
   restOfText = ""
   allWords = message.split()
@@ -125,26 +129,29 @@ def processInput(text):
       restOfText = firstAndRest[1].strip()
   
   # respond to message as needed:
-  # TODO: make generic firstWord/action registration instead?
+  # TODO(yanamal): make generic firstWord/action registration instead?
   # (pros: readability; can create commands dynamically as you go!
   #  con: any actions not triggered by firstWord would still have to be a manual if check.)
+  
+  # TODO: check end of kira-related message(s) for "in [channel]" modifier, send response to that channel if it exists.
+  
   if firstWord == 'hay':
-    sendMsg(userName+', hay v:')
+    sendMsg(userName+', hay v:', chan)
   elif firstWord == 'Kirasay':
-    sendMsg(restOfText)
+    sendMsg(restOfText, chan)
   elif firstWord == 'Kiraquote':
-    kiraquote(restOfText)
+    kiraquote(restOfText, chan)
   elif firstWord == 'Kirasearch':
-    kirasearch(restOfText)
+    kirasearch(restOfText, chan)
   elif firstWord == 'Kirabot,':
-  	irc.send(restOfText + "\n")
+  	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
-    sendMsg('>:|')
+    sendMsg('>:|', chan)
   elif firstWord == 'jetfuel':
    	sendMsg('Don\'t be silly. Jet fuel can\'t melt steel beams.')
   elif firstWord == 'wz':
   	# TODO: if the person is already an op, don't give it to them.
-    irc.send("MODE "+channel +" +o "+ userName + "\n")
+    sendIrcCommand("MODE "+channel +" +o "+ userName + "\n")
   elif firstWord == 'goto':
     sendMsg("MUTE command sent to Kira @ " + channel+ ". \"t(- - t)\"")
     channel = restOfText
@@ -153,17 +160,19 @@ def processInput(text):
     # and probably doable - file IO can't be impossible.
     # TODO: move this out into a separate function if it gets any longer.
   elif firstWord == 'sort':
-    tryRollingDice(restOfText, userName, True)
+    tryRollingDice(restOfText, userName, chan, True)
   else: # try to find a dice roll
-    tryRollingDice(message, userName)
-  # TODO: command to always sort a given user's dice from now on.
+    tryRollingDice(message, userName, chan)
+  # TODO(yanamal): user preference for 'always sort and display diff result'?
 
 
 ## Message sending
 
 
-def sendMsg(line):
+def sendMsg(line, chan=None):
   # send message to irc channel
+  if not chan:
+    chan = channel
   maxlen = 420 # max. length of message to send. Approximately size where it cuts off 
   # (428 in tests, but I suspect it depends on the prefixes like "PRIVMSG ..." etc.)
   explicit_lines = line.split('\n')
@@ -172,7 +181,7 @@ def sendMsg(line):
       cutoff = min(420, len(el))
       msg = el[0:cutoff]
       el = el[cutoff:]
-      irc.send('PRIVMSG '+channel+' :'+msg+' \r\n')
+      sendIrcCommand('PRIVMSG '+chan+' :'+msg+' \r\n')
 
 
 ## Generic input message handling
@@ -184,30 +193,26 @@ def getName(line):
 
 
 def getMsg(line):
-  # returns the contents of a message to the channel
+  # returns the contents of a message, and the channel(or user) it was send to
   # assumes format "PRIVMSG #channel :[message]"
-  
-  # So right now, it takes the input after the colon and returns it: i.e. return m[1]
-  # what if instead I did m=line.split('PRIVMSG '); that'd make m[1] into "#channel :outputoutput"
-  # and then if I were to do lastActiveChannel = m.split()[0];
-  # and then just the code as it is, except with lastActiveChannel in the place of channel
-  # So. I still need to split it at PRIVMSG. And then I need to make sure that what it returns is what comes after the #channel : part.
-  # But I need to get that lastActiveChannel out somehow. :( HOW THO I thought I had it there. 
+  # or "PRIVMSG user :[message]"
   m = line.split('PRIVMSG ')
   if len(m)>1:
     n = m[1].split(' :')
-    # probably unnecessary, but I'm not sure if it breaks something, so I'm leaving it here.
-    lastActiveChannel = n[0] # TODO: pass around channel/person from message
-    return n[1]
+    msg = n[1]
+    chan = n[0]
+    if chan[0]!= '#': # for PM, get the sender. Otherwise the bot just starts talking to itself.
+      chan = getName(line)
+    return (chan, msg)
   else:
-    return ""
+    return ("", "")
 
 
 def getFirstWordAndRest(line):
   # same assumption as getMsg
   # NOTE: this means it assumes that line is a whole irc line, not an arbitrary string.
   # i.e. PRIVMSG etc.
-  return getMsg(line).split(None,1)
+  return getMsg(line)[1].split(None,1)
 
 
 ## Dice logic
@@ -232,7 +237,7 @@ def rollDice(num, sides):
   return rolls
 
 
-def tryRollingDice(message, user, sort=False):
+def tryRollingDice(message, user, chan=None, sort=False):
   (num, sides) = matchDice(message)
   if num > 0:
     dice = rollDice(num, sides)
@@ -251,13 +256,13 @@ def tryRollingDice(message, user, sort=False):
         explanation = ' '.join(words[2:]) # don't include diffN in the beginning of the explanation text
     # TODO: use diff to calculate number of successes and add to explanation.
     # right here. diff is already the correct thing.
-    sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice))
+    sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice), chan)
 
 
 ## Kirabot functionality
 
 
-def kirasearch(searchString):
+def kirasearch(searchString, chan):
   # Loops through the quote array searching for a user-input string. When it finds the string,
   # it prints out that quote.
   # TODO: 'searchString[2]' prints out the second incidence of the string.
@@ -275,7 +280,7 @@ def kirasearch(searchString):
     else:
       quoteIndex = quoteIndex + 1
   if len(matchIndices) == 0:
-    sendMsg("No matches found.")
+    sendMsg("No matches found.", chan)
     #works
   else:
   # build match list:
@@ -288,18 +293,18 @@ def kirasearch(searchString):
       else:
         strMatches+=(", #" + str(i))
     strMatches+=(".\n")
-    sendMsg("Found match(es) in quotes " + strMatches)
+    sendMsg("Found match(es) in quotes " + strMatches, chan)
 
 
-def kiraquote(restOfText):
+def kiraquote(restOfText, chan):
   if restOfText == "":
     quoteIndex = randrange(len(quoteDatabase))
-    sendMsg("Quote #" + str(quoteIndex) + ":")
-    sendMsg(quoteDatabase[quoteIndex])
+    sendMsg("Quote #" + str(quoteIndex) + ":", chan)
+    sendMsg(quoteDatabase[quoteIndex], chan)
   else:
     quoteIndex = int(restOfText) # TODO: handle strange input gracefully (e.g. "Kiraquote 5 please" "Kiraquote Foo")
-    sendMsg("Quote #" + str(quoteIndex) + ":")
-    sendMsg(quoteDatabase[quoteIndex])
+    sendMsg("Quote #" + str(quoteIndex) + ":", chan)
+    sendMsg(quoteDatabase[quoteIndex], chan)
 
 
 ### main
@@ -308,7 +313,7 @@ def kiraquote(restOfText):
 def main():
   global channel, botnick
   # process command-line arguments
-  # TODO: look into better argument syntax?
+  # TODO(yanamal): look into better argument syntax?
   
   if len(sys.argv) > 1:
     channel = '#' + sys.argv[1]
