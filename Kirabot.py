@@ -150,7 +150,7 @@ def processInput(text):
    	sendMsg('Don\'t be silly. Jet fuel can\'t melt steel beams.')
   elif firstWord == 'wz':
   	# TODO: if the person is already an op, don't give it to them.
-    sendIrcCommand("MODE "+channel +" +o "+ userName + "\n")
+    sendIrcCommand("MODE "+chan +" +o "+ userName + "\n")
   elif firstWord == 'goto':
     sendMsg("MUTE command sent to Kira @ " + channel+ ". \"t(- - t)\"")
     channel = restOfText
