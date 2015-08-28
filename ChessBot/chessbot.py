@@ -7,7 +7,8 @@ import time
 import re
 from random import randrange
 
-
+gameOver = False
+turn = "white"
 def drawBoard(a,b,c,d,e,f,g,h):
 	print "╔═══╦═══╦═══╦═══╦═══╦═══╦═══╦═══╗"
 	print "║ "+a[7]+" ║ "+b[7]+" ║ "+c[7]+" ║ "+d[7]+" ║ "+e[7]+" ║ "+f[7]+" ║ "+g[7]+" ║ "+h[7]+" ║"
@@ -28,26 +29,38 @@ def drawBoard(a,b,c,d,e,f,g,h):
 	print "╚═══╩═══╩═══╩═══╩═══╩═══╩═══╩═══╝"
 
 def newGame():
-	# Initializes the arrays with starting positions proper.
-	a = ["R", "P", " ", " ", " ", " ", "P", "R"]
-	b = [i for i in range(8)]
-	c = [i for i in range(8)]
-	d = [i for i in range(8)]
-	e = [i for i in range(8)]
-	f = [i for i in range(8)]
-	g = [i for i in range(8)]
-	h = [i for i in range(8)]
+	# Initializes the arrays with starting positions proper. Not in use yet because I don't know how to share arrays properly, but this should start a brand new game if necessary.
+	a = ["R", "P", " ", " ", " ", " ", "p", "r"]
+	b = ["N", "P", " ", " ", " ", " ", "p", "n"]
+	c = ["B", "P", " ", " ", " ", " ", "p", "b"]
+	d = ["Q", "P", " ", " ", " ", " ", "p", "q"]
+	e = ["K", "P", " ", " ", " ", " ", "p", "k"]
+	f = ["B", "P", " ", " ", " ", " ", "p", "b"]
+	g = ["N", "P", " ", " ", " ", " ", "p", "n"]
+	h = ["R", "P", " ", " ", " ", " ", "p", "r"]
+	gameOver = False
 
 def main():
-	a = ["R", "P", " ", " ", " ", " ", "P", "R"]
-	b = ["N", "P", " ", " ", " ", " ", "P", "N"]
-	c = ["B", "P", " ", " ", " ", " ", "P", "B"]
-	d = ["Q", "P", " ", " ", " ", " ", "P", "Q"]
-	e = ["K", "P", " ", " ", " ", " ", "P", "K"]
-	f = ["B", "P", " ", " ", " ", " ", "P", "B"]
-	g = ["N", "P", " ", " ", " ", " ", "P", "N"]
-	h = ["R", "P", " ", " ", " ", " ", "P", "R"]
-	print "Welcome to Chessbot. Say \"Chessmove x\" to make your move."
+	a = ["R", "P", " ", " ", " ", " ", "p", "r"]
+	b = ["N", "P", " ", " ", " ", " ", "p", "n"]
+	c = ["B", "P", " ", " ", " ", " ", "p", "b"]
+	d = ["Q", "P", " ", " ", " ", " ", "p", "q"]
+	e = ["K", "P", " ", " ", " ", " ", "p", "k"]
+	f = ["B", "P", " ", " ", " ", " ", "p", "b"]
+	g = ["N", "P", " ", " ", " ", " ", "p", "n"]
+	h = ["R", "P", " ", " ", " ", " ", "p", "r"]
+	gameOver = False
+	print "Welcome to Chessbot. Say the piece you want to move and then where you want it to go to send a command - e.g. e2e4"
 	drawBoard(a,b,c,d,e,f,g,h)
+
+	while gameOver == False:
+		# take moves
+		if turn == "white":
+			nextMove = raw_input("White to move.\n")
+			print "Piece at " +  nextMove[0] + nextMove[1] + " moves to " + nextMove[3] + nextMove[4] + "."
+			
+
+
+
 
 main()
