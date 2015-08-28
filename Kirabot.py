@@ -107,10 +107,12 @@ def sendIrcCommand(command):
 
 ### Actual Bot Logic
 
+peopleToSortFor = set()
+
 
 def processInput(text):
   # process a line of text from the IRC server.
-  global channel
+  global channel, peopleToSortFor
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
   firstAndRest = getFirstWordAndRest(text)
@@ -136,6 +138,9 @@ def processInput(text):
   
   if firstWord == 'hay':
     sendMsg(userName+', hay v:', chan)
+  elif message.strip() == 'always-sort':
+    peopleToSortFor.add(userName)
+    sendMsg('always sorting rolls for '+userName)
   elif firstWord == 'Kirasay':
     sendMsg(restOfText, chan)
   elif firstWord == 'Kiraquote':
@@ -163,7 +168,6 @@ def processInput(text):
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
-
 
 ## Message sending
 
@@ -240,7 +244,7 @@ def tryRollingDice(message, user, chan=None, sort=False):
   (num, sides) = matchDice(message)
   if num > 0:
     dice = rollDice(num, sides)
-    if sort:
+    if sort or (user in peopleToSortFor):
       dice.sort()
       # TODO: put back "SORTED"?
     words = message.split()
