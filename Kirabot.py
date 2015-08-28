@@ -108,6 +108,7 @@ def sendIrcCommand(command):
 ### Actual Bot Logic
 
 peopleToSortFor = set()
+manualMode = set(['Ramc'])# people to never sort/count for
 
 
 def processInput(text):
@@ -141,6 +142,12 @@ def processInput(text):
   elif message.strip() == 'always-sort':
     peopleToSortFor.add(userName)
     sendMsg('always sorting rolls for '+userName)
+  elif message.strip() == 'manual-mode':
+    manualMode.add(userName)
+    sendMsg('manual mode enabled for '+userName)
+  elif message.strip() == 'non-manual-mode':
+    manualMode.remove(userName)
+    sendMsg('manual mode disabled for '+userName)
   elif firstWord == 'Kirasay':
     sendMsg(restOfText, chan)
   elif firstWord == 'Kiraquote':
@@ -241,10 +248,11 @@ def rollDice(num, sides):
 
 
 def tryRollingDice(message, user, chan=None, sort=False):
+  global peopleToSortFor, manualMode
   (num, sides) = matchDice(message)
   if num > 0:
     dice = rollDice(num, sides)
-    if sort or (user in peopleToSortFor):
+    if user not in manualMode and (sort or (user in peopleToSortFor)):
       dice.sort()
       # TODO: put back "SORTED"?
     words = message.split()
@@ -270,7 +278,7 @@ def tryRollingDice(message, user, chan=None, sort=False):
     sucString = ': BOTCH!!'
     if numSuc >= 0 or (successes):
       sucString = ': '+str(max(numSuc, 0))+' successes'
-    if user.lower().startswith('ramc'): # ramc mode - no successes
+    if user in manualMode: # ramc mode - no successes
       sucString = ''
     sendMsg(user + ', ' + explanation + roll + sucString +': ' + str(dice), chan)
 
