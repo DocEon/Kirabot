@@ -107,10 +107,13 @@ def sendIrcCommand(command):
 
 ### Actual Bot Logic
 
+peopleToSortFor = set()
+manualMode = set(['Ramc'])# people to never sort/count for
+
 
 def processInput(text):
   # process a line of text from the IRC server.
-  global channel
+  global channel, peopleToSortFor
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
   firstAndRest = getFirstWordAndRest(text)
@@ -136,6 +139,15 @@ def processInput(text):
   
   if firstWord == 'hay':
     sendMsg(userName+', hay v:', chan)
+  elif message.strip() == 'always-sort':
+    peopleToSortFor.add(userName)
+    sendMsg('always sorting rolls for '+userName)
+  elif message.strip() == 'manual-mode':
+    manualMode.add(userName)
+    sendMsg('manual mode enabled for '+userName)
+  elif message.strip() == 'non-manual-mode':
+    manualMode.remove(userName)
+    sendMsg('manual mode disabled for '+userName)
   elif firstWord == 'Kirasay':
     sendMsg(restOfText, chan)
   elif firstWord == 'Kiraquote':
@@ -163,7 +175,6 @@ def processInput(text):
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
-
 
 ## Message sending
 
@@ -237,16 +248,17 @@ def rollDice(num, sides):
 
 
 def tryRollingDice(message, user, chan=None, sort=False):
+  global peopleToSortFor, manualMode
   (num, sides) = matchDice(message)
   if num > 0:
     dice = rollDice(num, sides)
-    if sort:
+    if user not in manualMode and (sort or (user in peopleToSortFor)):
       dice.sort()
       # TODO: put back "SORTED"?
     words = message.split()
     roll = words[0]
-    diff = 5 # assume diff5 by default
-    explanation = ' '.join(words[1:]) # the rest of the words, joined back by spaces
+    diff = sides/2+1 # assume diff6 by default (for d10, diff11 for d20, etc.)
+    explanation = ' '.join(words[1:])+' ' # the rest of the words, joined back by spaces
     if len(words) > 1:
       maybeDiff = words[1]
       m = re.match(r'diff([0-9]+)', maybeDiff)
@@ -255,7 +267,20 @@ def tryRollingDice(message, user, chan=None, sort=False):
         explanation = ' '.join(words[2:]) # don't include diffN in the beginning of the explanation text
     # TODO: use diff to calculate number of successes and add to explanation.
     # right here. diff is already the correct thing.
-    sendMsg(user + ', ' + explanation + ' ' + roll + ': ' + str(dice), chan)
+    successes = False
+    numSuc = 0
+    for die in dice:
+      if die == 1:
+        numSuc -= 1
+      elif die >= diff:
+        numSuc += 1
+        successes = True
+    sucString = ': BOTCH!!'
+    if numSuc >= 0 or (successes):
+      sucString = ': '+str(max(numSuc, 0))+' successes'
+    if user in manualMode: # ramc mode - no successes
+      sucString = ''
+    sendMsg(user + ', ' + explanation + roll + sucString +': ' + str(dice), chan)
 
 
 ## Kirabot functionality
