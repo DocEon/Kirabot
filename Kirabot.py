@@ -158,6 +158,8 @@ def processInput(text):
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
     sendMsg('>:|', chan)
+  elif firstWord == 'Kirahelp':
+    sendMsg('Help file goes here.')
   elif firstWord == 'jetfuel':
    	sendMsg('Don\'t be silly. Jet fuel can\'t melt steel beams.')
   elif firstWord == 'wz':
