@@ -259,30 +259,45 @@ def tryRollingDice(message, user, chan=None, sort=False):
       # TODO: put back "SORTED"?
     words = message.split()
     roll = words[0]
-    diff = sides/2+1 # assume diff6 by default (for d10, diff11 for d20, etc.)
+    # (KEN: default diff doesn't seem to fit most use cases) 
+    # * diff = sides/2+1 # assume diff6 by default (for d10, diff11 for d20, etc.)
     explanation = ' '.join(words[1:])+' ' # the rest of the words, joined back by spaces
+    sucString = ''
     if len(words) > 1:
-      maybeDiff = words[1]
-      m = re.match(r'diff([0-9]+)', maybeDiff)
+      m = re.match(r'diff([0-9]+)', words[1])
       if m:
         diff = int(m.group(1))
-        explanation = ' '.join(words[2:]) # don't include diffN in the beginning of the explanation text
-    # TODO: use diff to calculate number of successes and add to explanation.
-    # right here. diff is already the correct thing.
-    successes = False
-    numSuc = 0
-    for die in dice:
-      if die == 1:
-        numSuc -= 1
-      elif die >= diff:
-        numSuc += 1
-        successes = True
-    sucString = ': BOTCH!!'
-    if numSuc >= 0 or (successes):
-      sucString = ': '+str(max(numSuc, 0))+' successes'
-    if user in manualMode: # ramc mode - no successes
-      sucString = ''
-    sendMsg(user + ', ' + explanation + roll + sucString +': ' + str(dice), chan)
+        intSuccesses = calculateSuccesses(dice, diff)
+        sucString = successesToString(intSuccesses)
+        explanation = ' '.join(words[2:])
+    sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " " + sucString), chan)
+
+def calculateSuccesses(dice, diff):
+  # A botch is going to return as an int with value -1
+  successes = False
+  numSuc = 0
+  for die in dice:
+    if die == 1:
+      numSuc -= 1
+    elif die >= diff:
+      numSuc += 1
+      successes = True
+  if numSuc < 0 and successes == False:
+    return -1
+  elif numSuc <= 0:
+    return 0
+  else:
+    return numSuc
+
+def successesToString(numSuc):
+  if numSuc == -1:
+    return "(BOTCH)"
+  elif numSuc == 0:
+    return "(Fail)"
+  elif numSuc == 1:
+    return "(1 success)"
+  else:
+    return "(" + str(numSuc) + " successes)"
 
 
 ## Kirabot functionality

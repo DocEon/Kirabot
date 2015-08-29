@@ -58,7 +58,10 @@ def main():
 		if turn == "white":
 			nextMove = raw_input("White to move.\n")
 			print "Piece at " +  nextMove[0] + nextMove[1] + " moves to " + nextMove[3] + nextMove[4] + "."
-			
+		else:
+			nextMove = raw_input("Black to move.\n")
+			print "Piece at " +  nextMove[0] + nextMove[1] + " moves to " + nextMove[3] + nextMove[4] + "."
+
 
 
 
