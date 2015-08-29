@@ -10,17 +10,6 @@ from random import randrange
 # user preferenc ebuilder.
  
 userDatabase = open("users.txt", 'r')
-# The end-goal of this project is to take a line of text from a text file that looks like this:
-#	<Ramc: sort = True; diff = False; doOp = True; etc>
-# and then generate a class, User, that stores each preference as a characteristic of the class
-
-# WILL NEED: a method that prints out the User's characteristics as a line of plain text
-# WILL NEED: something that loops through the whole dictionary of Users, runs ^ that print method, and saves a .txt file with all that. 
-# WILL NEED: a method that reads the text file and appends to the dictionary a new entry.
-# d['mynewkey'] = 'mynewvalue'
-
-#START with one pref: USER and sort; Ramc: sort=False, e.g.
-
 
 def readThroughDatabase():
 	userDictionary = {}
@@ -68,12 +57,35 @@ def printDatabaseFormat(users):
 def updateTextFile(users):
 	newDatabaseFile = open("users.txt", 'w')
 	for key in users:
-		newDatabaseFile.write(users[key]["Name"]+":sort="+users[key]["sort"]+";diff="+users[key]["diff"])
+		newDatabaseFile.write(users[key]["Name"]+":sort="+users[key]["sort"]+";diff="+users[key]["diff"]+"\n")
+
+def newUser(userName, users):
+	users[userName] = {'Name':userName, 'sort':'false','diff':'false'}
+
+def changePreference(userName, users, keyToChange, valueToChange):
+	users[userName][keyToChange] = valueToChange
+	
 def main():
 	users = readThroughDatabase()
-	printUserList(users)
+	runProgram = True
+	while runProgram:
+		command = raw_input("What do you want to do?")
+		if command == "printUserList":
+			printUserList(users)
+		elif command == "newUser":
+			userName = raw_input("What is the new user's name?")
+			#check for duplicates probs
+			newUser(userName, users)
+			updateTextFile(users)
+		elif command == "changePreference":
+			keyToChange = raw_input("What preference do you want to change? 'sort' or 'diff'?")
+			valueToChange = raw_input("And what is the new value of this preference?")
+			changePreference(userName, users, keyToChange, valueToChange)
+			updateTextFile(users)
+		elif command == "exit":
+			runProgram = False
 	updateTextFile(users)
-	print "Fin has sort set to " + users["Fin"]["sort"]
+
 
 
 main()
