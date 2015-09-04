@@ -159,7 +159,7 @@ def processInput(text):
   elif firstWord == 'sux' !=-1:
     sendMsg('>:|', chan)
   elif firstWord == 'Kirahelp':
-    sendMsg('Help file goes here.')
+    sendMsg('Check out https://github.com/DocEon/Kirabot/blob/master/documentation.txt for a list of what I can do.')
   elif firstWord == 'jetfuel':
    	sendMsg('Don\'t be silly. Jet fuel can\'t melt steel beams.')
   elif firstWord == 'wz':
@@ -254,7 +254,7 @@ def tryRollingDice(message, user, chan=None, sort=False):
   (num, sides) = matchDice(message)
   if num > 0:
     dice = rollDice(num, sides)
-    if user not in manualMode and (sort or (user in peopleToSortFor)):
+    if user not in manualMode or (sort or (user in peopleToSortFor)):
       dice.sort()
       # TODO: put back "SORTED"?
     words = message.split()

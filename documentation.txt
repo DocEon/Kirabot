@@ -1,0 +1,72 @@
+KIRABOT main commands:
+
+"Kirahelp" links to this document.
+
+~~~ ROLLING DICE ~~~ :
+
+The standard syntax for rolling dice is XdY, where X is the number of dice you want to roll and Y is the number of sides of dice
+
+	[22:54] Fin: 5d10
+	[22:54] KiraBot: Fin,  5d10: [3, 4, 1, 10, 1]  
+
+
+The SORT prefix will sort your results. e.g. "sort 5d10"
+
+	[22:54] Fin: sort 5d10
+	[22:54] KiraBot: Fin,  5d10: [1, 6, 6, 8, 9]  
+
+If you add a difficulty to the end of the roll, Kira will count your successes and output them after the results. e.g. "5d10 diff6"
+
+	[22:54] Fin: 5d10 diff6
+	[22:54] KiraBot: Fin, 5d10: [5, 2, 3, 8, 3] (1 success)]
+
+You can use multiple commands at once: e.g. "sort 5d10 diff6"
+
+	[22:54] Fin: sort 5d10 diff6
+	[22:54] KiraBot: Fin, 5d10: [3, 5, 5, 7, 10] (2 successes)
+
+If you say "always-sort", Kira will sort your dice by default. Doesn't persist on rebooting the bot yet.
+
+If you say "manual-mode", Kira will never sort your dice and will never count your successes. Ramc has this on by default.
+
+~~~ GENERAL COMMANDS ~~~ :
+
+"Kirabot, <COMMAND>" will have Kira output <COMMAND> directly to the IRC server. You can do a lot of stuff with this. 
+It's possible to have Kirabot join channels, change channel modes, give out ops, and kick using this generic command.
+
+	[22:59] Fin: Kirabot, kick #MAGE Fin
+	[22:59] You have been kicked out of the channel
+	[22:59] KiraBot has kicked Fin (Fin)
+
+"Kirasay <WORDS>" will have Kira say <WORDS> in whatever channel you tell him to say something. TODO: Kirasay #channel <WORDS> to allow for remote control.
+
+~~~ QUOTE DATABASE ~~~
+
+Kirabot has a text file, quotes.txt, where he stores some quotes from Karen's big quote googledoc. He loads this up as a database every time he starts up.
+
+You can access a specific quote by its index using the "Kiraquote" commmand. 
+
+	[23:04] Fin: Kiraquote 6
+	[23:04] KiraBot: Quote #6:
+	[23:04] KiraBot: [23:09] <@Ramc> (this isn't a dating sim)
+	[23:04] KiraBot: [23:09] <Candace> (false)
+	[23:04] KiraBot: [23:10] <Candace> (this is actually incredibly like a dating sim)
+	[23:04] KiraBot: [23:10] <@Ramc> (candace who is your love interest even)
+	[23:04] KiraBot: [23:10] <@Ramc> (jesus?)
+
+If you want a quote but don't know the index, you can use "Kirasearch <STRING>" 
+
+	[23:04] Ramc: BoMage, the dating sim
+	[23:04] Ramc: I think there is like one other dating sim joke in there too
+	[23:04] Ramc: something about Edward getting the Bad Ending
+	[23:05] Fin: Kirasearch dating
+	[23:05] KiraBot: Found match(es) in quotes #6, #7.
+
+~~~ OTHER STUFF: ~~~
+
+Kira will op you if you say "wz"
+
+	[22:55] Fin: wz
+	[22:55] KiraBot has changed mode: +o Fin
+
+Kira also has a few phrases that he answers with speech. You can find those in the code if you really want to see them.

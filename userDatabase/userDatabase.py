@@ -9,6 +9,9 @@ from random import randrange
 
 # user preferenc ebuilder.
  
+ #todo: open and close the file at the right time. 
+ #JSON
+
 userDatabase = open("users.txt", 'r')
 
 def readThroughDatabase():
@@ -26,17 +29,17 @@ def buildUserEntry(lineFromTextFile):
 		sort = False
 		d={}
 		# Gets the username from the line.
-		userName = lineFromTextFile.split(":")[0]
+		nameAndPreferences = lineFromTextFile.split(":")
+		userName = nameAndPreferences[0]
 		d["Name"] = userName
 
 		# Gets the preferences from the line
 
-		preferences = lineFromTextFile.split(":")[1]
-		prefSort = preferences.split(";")[0]
-		d[prefSort.split("=")[0]] = prefSort.split("=")[1]
+		preferences = nameAndPreferences[1].split(";")
 
-		prefDiff = preferences.split(";")[1]
-		d[prefDiff.split("=")[0]] = prefDiff.split("=")[1]
+		for i in preferences:
+			currentPreference = preferences[i].split("=")
+			d[currentPreference[0]] = currentPreference[1]
 
 		#TODO: turn this into a loop that works for an arbitrary amount of preferences.
 

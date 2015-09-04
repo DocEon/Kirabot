@@ -1,6 +1,4 @@
 yanamal:sort=true;diff=false
-
 Fin:sort=true;diff=true
-
 Pere:sort=false;diff=false
 Ramc:sort=false;diff=false
