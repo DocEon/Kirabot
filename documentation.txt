@@ -24,6 +24,11 @@ You can use multiple commands at once: e.g. "sort 5d10 diff6"
 
 	[22:54] Fin: sort 5d10 diff6
 	[22:54] KiraBot: Fin, 5d10: [3, 5, 5, 7, 10] (2 successes)
+	
+You can get the sum of your dice roll and an additional number: e.g. "1d10+7"
+	
+	[00:19] Fin: 1d10+4
+	[00:19] KiraBot: Fin,  1d10+4: [8] = <12>  
 
 If you say "always-sort", Kira will sort your dice by default. Doesn't persist on rebooting the bot yet.
 
