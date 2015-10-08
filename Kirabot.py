@@ -13,8 +13,8 @@ from random import randrange
 
 
 quoteDatabase = [""]
-server = "irc.arcti.ca"
-port = 6697
+server = "irc.choopa.net"
+port = 9999
 password = ""
 channel = "#Mage"
 botnick = "Kirabot"
@@ -231,15 +231,22 @@ def getFirstWordAndRest(line):
 
 
 def matchDice(word):
-  # returns tuple with number and sides of dice to roll, if the word is of the format 1d10
-  # otherwise returns (0,0)
+  # returns tuple with number and sides of dice to roll, if the word is of the format 1d10.
+  # if there's a + sign after the roll, it returns the number after the +; otherwise, the third number in the tuple is 0.
+  # otherwise returns (0,0,0)
+  shouldIAdd = re.match(r'([0-9]+)d([0-9]+)\+([0-9]+)', word)
   m = re.match(r'([0-9]+)d([0-9]+)', word)
-  if m:
+  if shouldIAdd:
+  	num = int(shouldIAdd.group(1))
+  	sides = int(shouldIAdd.group(2))
+  	adder = int(shouldIAdd.group(3))
+  	return (num, sides, adder)
+  elif m:
     num = int(m.group(1))
     sides = int(m.group(2))
-    return (num, sides)
+    return (num, sides, 0)
   else:
-    return (0,0)
+    return (0,0,0)
 
 
 def rollDice(num, sides):
@@ -251,7 +258,8 @@ def rollDice(num, sides):
 
 def tryRollingDice(message, user, chan=None, sort=False):
   global peopleToSortFor, manualMode
-  (num, sides) = matchDice(message)
+  (num, sides, adder) = matchDice(message)
+  # check for if addition is neccesary:
   if num > 0:
     dice = rollDice(num, sides)
     if user not in manualMode or (sort or (user in peopleToSortFor)):
@@ -270,7 +278,11 @@ def tryRollingDice(message, user, chan=None, sort=False):
         intSuccesses = calculateSuccesses(dice, diff)
         sucString = successesToString(intSuccesses)
         explanation = ' '.join(words[2:])
-    sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " " + sucString), chan)
+    if adder > 0:
+    	total = str(sum(dice)+adder)
+    	sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " = <" + total + "> " + sucString), chan)
+    else:
+		sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " " + sucString), chan)
 
 def calculateSuccesses(dice, diff):
   # A botch is going to return as an int with value -1
