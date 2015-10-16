@@ -174,6 +174,8 @@ def processInput(text):
     # TODO: move this out into a separate function if it gets any longer.
   elif firstWord == 'sort':
     tryRollingDice(restOfText, userName, chan, True)
+  elif firstWord == '!shades'
+  	sendMsg('( •_•)    ( •_•)>⌐■-■    (⌐■_■)')
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
