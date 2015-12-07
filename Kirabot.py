@@ -141,7 +141,8 @@ def processInput(text):
   if firstWord == 'hay':
     sendMsg(userName+', hay v:', chan)
   elif message.strip() == 'always-sort':
-    sendMsg("Not working right now.", chan)
+     peopleToSortFor.add(userName)
+     sendMsg('always sorting rolls for '+userName)
   elif message.strip() == 'manual-mode':
     manualMode.add(userName)
     sendMsg('manual mode enabled for '+userName)
@@ -353,17 +354,6 @@ def kirasearch(searchString, chan):
     strMatches+=(".\n")
     sendMsg("Found match(es) in quotes " + strMatches, chan)
 
-#taken from http://stackoverflow.com/questions/956867/how-to-get-string-objects-instead-of-unicode-ones-from-json-in-python . 
-def byteify(input):
-    if isinstance(input, dict):
-        return {byteify(key):byteify(value) for key,value in input.iteritems()}
-    elif isinstance(input, list):
-        return [byteify(element) for element in input]
-    elif isinstance(input, unicode):
-        return input.encode('utf-8')
-    else:
-        return input
-
 def kiraquote(restOfText, chan):
   if restOfText == "":
     quoteIndex = randrange(len(quoteDatabase))
@@ -383,10 +373,7 @@ def kiraquote(restOfText, chan):
 def readUserDictionary():
   f = open('JSONUsers.txt', 'r')
   userDictionary = json.load(f)
-
-  #for line in f:
-  # userFromDictionary = json.loads(line)
-  # userDictionary[userFromDictionary["nickname"]] = json.loads(line)
+  f.close()
   return userDictionary
 
 def changeUserProperty(userDictionary, userToChange, propertyToChange, newValue):
@@ -397,6 +384,7 @@ def changeUserProperty(userDictionary, userToChange, propertyToChange, newValue)
 def writeUserDictionaryFile(userDictionary):  
   f = open('JSONUsers.txt', 'w')
   json.dump(userDictionary, f, indent = 4)
+  f.close()
   # this gets called every time someone changes a setting. It generates a new list of all users
   # and prints out that stuff as .json and then saves it as a .txt from which it reads on startup.
 
