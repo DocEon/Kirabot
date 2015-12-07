@@ -6,6 +6,7 @@ import ssl
 import socket
 import time
 import re
+import json
 from random import randrange
 
 
@@ -20,7 +21,7 @@ channel = "#Mage"
 botnick = "Kirabot"
 irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
-
+userDictionary = {}
 
 ### Quotes database
 
@@ -140,8 +141,7 @@ def processInput(text):
   if firstWord == 'hay':
     sendMsg(userName+', hay v:', chan)
   elif message.strip() == 'always-sort':
-    peopleToSortFor.add(userName)
-    sendMsg('always sorting rolls for '+userName)
+    sendMsg("Not working right now.", chan)
   elif message.strip() == 'manual-mode':
     manualMode.add(userName)
     sendMsg('manual mode enabled for '+userName)
@@ -176,6 +176,8 @@ def processInput(text):
     tryRollingDice(restOfText, userName, chan, True)
   elif firstWord == '!shades':
   	sendMsg('( •_•)    ( •_•)>⌐■-■    (⌐■_■)')
+  elif firstWord == 'userProperty':
+    printUserProperty(userDictionary, restOfText, chan)
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
@@ -264,6 +266,7 @@ def tryRollingDice(message, user, chan=None, sort=False):
   # check for if addition is neccesary:
   if num > 0:
     dice = rollDice(num, sides)
+    # if userDatabase[user]["sort"] != "False"
     if user not in manualMode or (sort or (user in peopleToSortFor)):
       dice.sort()
       # TODO: put back "SORTED"?
@@ -350,6 +353,16 @@ def kirasearch(searchString, chan):
     strMatches+=(".\n")
     sendMsg("Found match(es) in quotes " + strMatches, chan)
 
+#taken from http://stackoverflow.com/questions/956867/how-to-get-string-objects-instead-of-unicode-ones-from-json-in-python . 
+def byteify(input):
+    if isinstance(input, dict):
+        return {byteify(key):byteify(value) for key,value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
 
 def kiraquote(restOfText, chan):
   if restOfText == "":
@@ -362,6 +375,40 @@ def kiraquote(restOfText, chan):
     sendMsg(quoteDatabase[quoteIndex], chan)
 
 
+### Persistent user state functionality using JSON
+
+## to check property 'property' for user 'user', use userDictionary['user']['property']
+## e.g. userDictionary['Fin']['auto-op'] will return 'True' if Fin is set to auto-op.
+
+def readUserDictionary():
+  f = open('JSONUsers.txt', 'r')
+  userDictionary = json.load(f)
+
+  #for line in f:
+  # userFromDictionary = json.loads(line)
+  # userDictionary[userFromDictionary["nickname"]] = json.loads(line)
+  return userDictionary
+
+def changeUserProperty(userDictionary, userToChange, propertyToChange, newValue):
+  userDictionary[userToChange][propertyToChange] = newValue
+  writeUserDictionary(userDictionary)
+  return userDictionary
+
+def writeUserDictionaryFile(userDictionary):  
+  f = open('JSONUsers.txt', 'w')
+  json.dump(userDictionary, f, indent = 4)
+  # this gets called every time someone changes a setting. It generates a new list of all users
+  # and prints out that stuff as .json and then saves it as a .txt from which it reads on startup.
+
+#For testing purposes.
+def printUserProperty(userDictionary, restOfText, chan):
+  commands = restOfText.split()
+  userToRead = commands[0]
+  propertyToRead = commands[1]
+  if userToRead in userDictionary:
+    sendMsg(userDictionary[userToRead][propertyToRead], chan)
+  else:
+    sendMsg("That user doesn't have a profile yet.", chan)
 ### main
 
 
@@ -369,7 +416,6 @@ def main():
   global channel, botnick
   # process command-line arguments
   # TODO(yanamal): look into better argument syntax?
-  
   if len(sys.argv) > 1:
     channel = '#' + sys.argv[1]
   else:
@@ -383,12 +429,15 @@ def main():
   # load data from file(s)
   loadQuotes()
   
+  # load user states
+
   # start bot
   connectAndJoin()
   inputLoop()
 
 
 if __name__ == "__main__":
+  userDictionary = readUserDictionary()
   main()
 # this means that main() is run only if kirabot.py was called directly rather than imported.
 # otherwise, it is treated as a library, essentially.
