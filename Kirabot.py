@@ -370,6 +370,7 @@ def kiraquote(restOfText, chan):
 ## to check property 'property' for user 'user', use userDictionary['user']['property']
 ## e.g. userDictionary['Fin']['auto-op'] will return 'True' if Fin is set to auto-op.
 
+## Populates dictionary userDictionary with deserialized information from the json file.
 def readUserDictionary():
   f = open('JSONUsers.txt', 'r')
   userDictionary = json.load(f)
@@ -378,7 +379,7 @@ def readUserDictionary():
 
 def changeUserProperty(userDictionary, userToChange, propertyToChange, newValue):
   userDictionary[userToChange][propertyToChange] = newValue
-  writeUserDictionary(userDictionary)
+  writeUserDictionaryFile(userDictionary)
   return userDictionary
 
 def writeUserDictionaryFile(userDictionary):  
@@ -397,6 +398,32 @@ def printUserProperty(userDictionary, restOfText, chan):
     sendMsg(userDictionary[userToRead][propertyToRead], chan)
   else:
     sendMsg("That user doesn't have a profile yet.", chan)
+
+def buildMode(userDictionary):
+  print "Entering debugging mode. Right now this only works with the dictionary stuff."
+  command = ""
+  while command != "exit":
+    command = raw_input("Input command:\n")
+    if command == "printDictionary":
+      print userDictionary
+    elif command == "change":
+      userToChange = raw_input("Who do you want to change?\n")
+      if userToChange not in userDictionary:
+        userDictionary = makeNewUser(userDictionary, userToChange)
+      propertyToChange = raw_input("What do you want to change?\n")
+      newValue = raw_input("What's the new value?\n")
+      print "Old value: " + userDictionary[userToChange][propertyToChange]
+      changeUserProperty(userDictionary, userToChange, propertyToChange, newValue)
+      print "New value: " + userDictionary[userToChange][propertyToChange]
+    else:
+      print "Invalid command. Try printDictionary, change, or exit."
+  return userDictionary
+
+def makeNewUser(userDictionary, userToMake):
+  userDictionary[userToMake] = {"sort": "True", "manual_mode": "False", "nickname": userToMake, "real_name": "default"}
+  writeUserDictionaryFile(userDictionary)
+  return userDictionary
+
 ### main
 
 
@@ -424,8 +451,11 @@ def main():
   inputLoop()
 
 
+
+
 if __name__ == "__main__":
   userDictionary = readUserDictionary()
+  userDictionary = buildMode(userDictionary)
   main()
 # this means that main() is run only if kirabot.py was called directly rather than imported.
 # otherwise, it is treated as a library, essentially.

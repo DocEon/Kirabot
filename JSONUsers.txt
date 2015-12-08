@@ -1,7 +1,13 @@
 {
+    "Kestrel": {
+        "sort": "True", 
+        "real_name": "Jimmy", 
+        "nickname": "Kestrel", 
+        "manual_mode": "False"
+    }, 
     "Fin": {
         "sort": "False", 
-        "real_name": "ken", 
+        "real_name": "Kenneth", 
         "nickname": "Fin", 
         "manual_mode": "False"
     }, 
