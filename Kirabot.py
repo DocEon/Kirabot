@@ -105,16 +105,13 @@ def sendIrcCommand(command):
   irc.send(command)
   print ' > '+command
 
-
 ### Actual Bot Logic
-
-peopleToSortFor = set()
-manualMode = set(['Ramc'])# people to never sort/count for
-
 
 def processInput(text):
   # process a line of text from the IRC server.
-  global channel, peopleToSortFor
+  global channel
+  global userDictionary
+
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
   firstAndRest = getFirstWordAndRest(text)
@@ -141,14 +138,15 @@ def processInput(text):
   if firstWord == 'hay':
     sendMsg(userName+', hay v:', chan)
   elif message.strip() == 'always-sort':
-     peopleToSortFor.add(userName)
-     sendMsg('always sorting rolls for '+userName)
-  elif message.strip() == 'manual-mode':
-    manualMode.add(userName)
-    sendMsg('manual mode enabled for '+userName)
-  elif message.strip() == 'non-manual-mode':
-    manualMode.remove(userName)
-    sendMsg('manual mode disabled for '+userName)
+    if userName not in userDictionary:
+      userDictionary = makeNewUser(userDictionary, userName)
+    changeUserProperty(userDictionary, userName, "sort", "True")
+    sendMsg('always sorting rolls for '+userName)
+  elif message.strip() == 'never-sort':
+    if userName not in userDictionary:
+      userDictionary = makeNewUser(userDictionary, userName)
+    changeUserProperty(userDictionary, userName, "sort", "False")
+    sendMsg('Never sorting for '+userName)
   elif firstWord == 'Kirasay':
     sendMsg(restOfText, chan)
   elif firstWord == 'Kiraquote':
@@ -161,8 +159,6 @@ def processInput(text):
     sendMsg('>:|', chan)
   elif firstWord == 'Kirahelp':
     sendMsg('Check out https://github.com/DocEon/Kirabot/blob/master/documentation.txt for a list of what I can do.')
-  elif firstWord == 'jetfuel':
-   	sendMsg('Don\'t be silly. Jet fuel can\'t melt steel beams.')
   elif firstWord == 'wz':
   	# TODO: if the person is already an op, don't give it to them.
     sendIrcCommand("MODE "+channel +" +o "+ userName + "\n")
@@ -173,8 +169,6 @@ def processInput(text):
     # TODO: give the bot memory of the channel it was in - some kind of log list would be cool. making the bot log would also be really cool
     # and probably doable - file IO can't be impossible.
     # TODO: move this out into a separate function if it gets any longer.
-  elif firstWord == 'sort':
-    tryRollingDice(restOfText, userName, chan, True)
   elif firstWord == '!shades':
   	sendMsg('( •_•)    ( •_•)>⌐■-■    (⌐■_■)')
   elif firstWord == 'userProperty':
@@ -262,13 +256,13 @@ def rollDice(num, sides):
 
 
 def tryRollingDice(message, user, chan=None, sort=False):
-  global peopleToSortFor, manualMode
+  global userDictionary
   (num, sides, adder) = matchDice(message)
   # check for if addition is neccesary:
   if num > 0:
     dice = rollDice(num, sides)
     # if userDatabase[user]["sort"] != "False"
-    if user not in manualMode or (sort or (user in peopleToSortFor)):
+    if user not in userDictionary or userDictionary[user]["sort"] == "True":
       dice.sort()
       # TODO: put back "SORTED"?
     words = message.split()
@@ -420,7 +414,7 @@ def buildMode(userDictionary):
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):
-  userDictionary[userToMake] = {"sort": "True", "manual_mode": "False", "nickname": userToMake, "real_name": "default"}
+  userDictionary[userToMake] = {"sort": "True", "nickname": userToMake, "real_name": "default"}
   writeUserDictionaryFile(userDictionary)
   return userDictionary
 

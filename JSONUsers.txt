@@ -1,26 +1,22 @@
 {
     "Kestrel": {
         "sort": "True", 
-        "real_name": "Jimmy", 
         "nickname": "Kestrel", 
-        "manual_mode": "False"
+        "real_name": "Jimmy"
     }, 
     "Fin": {
-        "sort": "False", 
-        "real_name": "Kenneth", 
+        "sort": "True", 
         "nickname": "Fin", 
-        "manual_mode": "False"
+        "real_name": "Kenneth"
     }, 
     "Pere": {
         "sort": "False", 
-        "real_name": "karens", 
         "nickname": "Pere", 
-        "manual_mode": "True"
+        "real_name": "karens"
     }, 
     "Ramc": {
         "sort": "False", 
-        "real_name": "Marc", 
         "nickname": "Ramc", 
-        "manual_mode": "True"
+        "real_name": "Marc"
     }
 }
