@@ -1,0 +1,32 @@
+{
+    "Pere": {
+        "sort": "False", 
+        "nickname": "Pere", 
+        "real_name": "karens"
+    }, 
+    "Kestrel": {
+        "sort": "True", 
+        "nickname": "Kestrel", 
+        "real_name": "Jimmy"
+    }, 
+    "Merlebird": {
+        "sort": "True", 
+        "nickname": "Merlebird", 
+        "real_name": "default"
+    }, 
+    "Prelate": {
+        "sort": "False", 
+        "nickname": "Prelate", 
+        "real_name": "default"
+    }, 
+    "Fin": {
+        "sort": "False", 
+        "nickname": "Fin", 
+        "real_name": "Kenneth"
+    }, 
+    "Ramc": {
+        "sort": "False", 
+        "nickname": "Ramc", 
+        "real_name": "Marc"
+    }
+}

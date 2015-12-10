@@ -1,0 +1,20 @@
+{
+    "Fin": {
+        "sort": "True", 
+        "manual_mode": "False", 
+        "nickname": "Fin", 
+        "real_name": "ken"
+    }, 
+    "Pere": {
+        "sort": "False", 
+        "manual_mode": "True", 
+        "nickname": "Pere", 
+        "real_name": "karens"
+    }, 
+    "Ramc": {
+        "sort": "False", 
+        "manual_mode": "True", 
+        "nickname": "Ramc", 
+        "real_name": "Marc"
+    }
+}
