@@ -394,9 +394,10 @@ def printUserProperty(userDictionary, restOfText, chan):
     sendMsg("That user doesn't have a profile yet.", chan)
 
 def buildMode(userDictionary):
-  print "Entering debugging mode. Right now this only works with the dictionary stuff."
+  print "Welcome to Kirabot. Type connect to use default settings, or config if you'd like to change connection settings."
   command = ""
-  while command != "exit":
+  global server, port, channel, botnick
+  while command != "connect":
     command = raw_input("Input command:\n")
     if command == "printDictionary":
       print userDictionary
@@ -409,8 +410,12 @@ def buildMode(userDictionary):
       print "Old value: " + userDictionary[userToChange][propertyToChange]
       changeUserProperty(userDictionary, userToChange, propertyToChange, newValue)
       print "New value: " + userDictionary[userToChange][propertyToChange]
-    else:
-      print "Invalid command. Try printDictionary, change, or exit."
+    elif command == "config":
+      server = raw_input("What's the new server?")
+      port = raw_input("What's the new port?")
+      port = int(port)
+      channel = raw_input("What channel?")
+      botnick = raw_input("What nickname?")
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):
@@ -425,15 +430,15 @@ def main():
   global channel, botnick
   # process command-line arguments
   # TODO(yanamal): look into better argument syntax?
-  if len(sys.argv) > 1:
-    channel = '#' + sys.argv[1]
-  else:
-    channel = raw_input('What channel would you like to join?\n')
+  #if len(sys.argv) > 1:
+  #  channel = '#' + sys.argv[1]
+  #else:
+  #  channel = raw_input('What channel would you like to join?\n')
   
-  if len(sys.argv) > 2:
-    botnick = sys.argv[2]
-  else:
-    botnick = raw_input('And what nickname?\n')
+  #if len(sys.argv) > 2:
+  #  botnick = sys.argv[2]
+  #else:
+  #  botnick = raw_input('And what nickname?\n')
     
   # load data from file(s)
   loadQuotes()
