@@ -9,6 +9,8 @@ import re
 import json
 from random import randrange
 
+# To fix the bug, Ken, you just need to test to see if the first word of text in tryGettingInput (line52) is "ERROR". 
+# If it is, then you can just quit the program with an error. Or, better, go into error-handling mode where you wait ten minutes and then try again. 
 
 ### global variables (with defaults that will likely be overridden)
 
@@ -48,7 +50,16 @@ def tryGettingInput(callback):
     text=irc.recv(2040) # wait for the next bit of input from the IRC server. Limit to 2040 characters.
     # (the rest would stay in the buffer and get processed afterwards, I think)
     if text.strip() != '':
-      print text
+      textArray = text.split()
+      if textArray[0] == "ERROR":
+        print text
+        print "We don't know how to deal with errors! SHUT THE WHOLE THING DOWN."
+        sys.exit(0)
+      elif textArray[0] == "[Errno 104]":
+        # reconnect here
+        print "Disconnected. Waiting 30 seconds and then trying to reconnect..."
+        time.sleep(30)
+      print time.strftime("%H:%M:%D ") + text
     # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
     if text.find('PING') != -1: # if there is a "PING" anywhere in the text
       sendIrcCommand('PONG ' + text.split()[1] + '\r\n')
