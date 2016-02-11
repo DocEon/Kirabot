@@ -60,10 +60,10 @@ def tryGettingInput(callback):
         time.sleep(5)
         connectAndJoin()
         inputLoop()
-      logHelperList.append(time.strftime("%H:%M:%D ") + text)
+      logHelperList.append(time.strftime("%H:%M:%S ") + text)
       if len(logHelperList) > 9:
         logHelperList = logAList(logHelperList)
-      print time.strftime("%H:%M:%D ") + text
+      print time.strftime("%H:%M:%S ") + text
     # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
     if text.find('PING') != -1: # if there is a "PING" anywhere in the text
       sendIrcCommand('PONG ' + text.split()[1] + '\r\n')
