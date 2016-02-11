@@ -7,6 +7,7 @@ import socket
 import time
 import re
 import json
+import os.path
 from random import randrange
 
 # To fix the bug, Ken, you just need to test to see if the first word of text in tryGettingInput (line52) is "ERROR". 
@@ -24,7 +25,7 @@ botnick = "Kirabot"
 irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
 userDictionary = {}
-
+logHelperList = []
 ### Quotes database
 
 
@@ -46,19 +47,22 @@ def loadQuotes():
 def tryGettingInput(callback):
   # try reading a line of IRC input.
   # callback is a function that takes one argument - the raw line of input - and processes it as desired.
+  global logHelperList
   try:
     text=irc.recv(2040) # wait for the next bit of input from the IRC server. Limit to 2040 characters.
     # (the rest would stay in the buffer and get processed afterwards, I think)
     if text.strip() != '':
       textArray = text.split()
-      if textArray[0] == "ERROR":
+      if textArray[0] == "ERROR" or textArray[0] == "[Errno 104]":
         print text
-        print "We don't know how to deal with errors! SHUT THE WHOLE THING DOWN."
-        sys.exit(0)
-      elif textArray[0] == "[Errno 104]":
-        # reconnect here
-        print "Disconnected. Waiting 30 seconds and then trying to reconnect..."
-        time.sleep(30)
+        print "textArray[0] = " + textArray[0]
+        print "We're going to wait 30 seconds and then try and reconnect."
+        time.sleep(5)
+        connectAndJoin()
+        inputLoop()
+      logHelperList.append(time.strftime("%H:%M:%D ") + text)
+      if len(logHelperList) > 9:
+        logHelperList = logAList(logHelperList)
       print time.strftime("%H:%M:%D ") + text
     # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
     if text.find('PING') != -1: # if there is a "PING" anywhere in the text
@@ -434,8 +438,28 @@ def makeNewUser(userDictionary, userToMake):
   writeUserDictionaryFile(userDictionary)
   return userDictionary
 
-### main
+## Log Stuff
 
+# This function takes a list of lines and writes them to a text file at ./logs with a filename based on the date.
+# It first checks to make sure that the log folder exists. 
+# After writing the list to the text file, it clears the list and returns the new, empty list. So, proper use should be:
+# listToLog = logAList(listToLog)
+
+def logAList(listToLog):
+  path = os.path.join(os.path.abspath("."), "logs")
+  if not os.path.exists(path):
+    print "No logs folder detected. Making a new folder for logs at " + path
+    os.makedirs(path)
+  fileName = time.strftime("%m_%d_%Y") + "_LOG.txt"
+  fullName = os.path.join(path, fileName)
+  logFile = open(fullName, 'a')
+  for i in listToLog:
+    logFile.write(i + "\n")
+  listToLog = []
+  logFile.close()
+  return listToLog
+
+### main
 
 def main():
   global channel, botnick
@@ -453,7 +477,6 @@ def main():
     
   # load data from file(s)
   loadQuotes()
-  
   # load user states
 
   # start bot
