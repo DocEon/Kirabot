@@ -53,7 +53,7 @@ def tryGettingInput(callback):
     # (the rest would stay in the buffer and get processed afterwards, I think)
     if text.strip() != '':
       textArray = text.split()
-      if textArray[0] == "ERROR" or textArray[0] == "[Errno 104]":
+      if textArray[0] == "ERROR" or textArray[0] == "[Errno":
         print text
         print "textArray[0] = " + textArray[0]
         print "We're going to wait 30 seconds and then try and reconnect."
