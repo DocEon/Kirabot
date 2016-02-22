@@ -409,7 +409,7 @@ def printUserProperty(userDictionary, restOfText, chan):
     sendMsg("That user doesn't have a profile yet.", chan)
 
 def buildMode(userDictionary):
-  print "Welcome to Kirabot. Type connect to use default settings, or config if you'd like to change connection settings."
+  print "Welcome to Kirabot. Type connect to use default settings, config if you'd like to change connection settings, alt if you want to use the other server."
   command = ""
   global server, port, channel, botnick
   while command != "connect":
@@ -431,6 +431,9 @@ def buildMode(userDictionary):
       port = int(port)
       channel = raw_input("What channel?")
       botnick = raw_input("What nickname?")
+    elif command == "alt":
+    	server = "efnet.portlane.se"
+    	port = 9999
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):
