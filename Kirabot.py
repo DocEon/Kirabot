@@ -51,19 +51,10 @@ def tryGettingInput(callback):
   try:
     text=irc.recv(2040) # wait for the next bit of input from the IRC server. Limit to 2040 characters.
     # (the rest would stay in the buffer and get processed afterwards, I think)
-    if text.strip() != '':
-      textArray = text.split()
-      if textArray[0] == "ERROR" or textArray[0] == "[Errno":
-        print text
-        print "textArray[0] = " + textArray[0]
-        print "We're going to wait 30 seconds and then try and reconnect."
-        time.sleep(5)
-        connectAndJoin()
-        inputLoop()
-      logHelperList.append(time.strftime("%H:%M:%S ") + text)
-      if len(logHelperList) > 9:
-        logHelperList = logAList(logHelperList)
-      print time.strftime("%H:%M:%S ") + text
+    logHelperList.append(time.strftime("%H:%M:%S ") + text)
+    if len(logHelperList) > 10:
+      logHelperList = logAList(logHelperList)
+    print time.strftime("%H:%M:%S ") + text
     # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
     if text.find('PING') != -1: # if there is a "PING" anywhere in the text
       sendIrcCommand('PONG ' + text.split()[1] + '\r\n')
@@ -111,8 +102,20 @@ def connectAndJoin():
 
 def inputLoop():
   # An infinite loop waiting for input and processing it.
-  while True:
+  global logHelperList
+  keepLooping = 0
+  while keepLooping < 25:
+    startTime = time.time()
     tryGettingInput(processInput)
+    print("~%s seconds~" % (time.time() - startTime))
+    if (time.time()-startTime) < 0.1:
+      keepLooping += 1
+    else:
+      keepLooping = 0
+  #print "Looped too fast " + keepLooping + " times in a row. Disconnecting."
+  logHelperList = logAList(logHelperList)
+
+
 
 
 def sendIrcCommand(command):
