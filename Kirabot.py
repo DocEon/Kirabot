@@ -114,6 +114,10 @@ def inputLoop():
       keepLooping = 0
   #print "Looped too fast " + keepLooping + " times in a row. Disconnecting."
   logHelperList = logAList(logHelperList)
+  print "Disconnected. Trying to reconnect in 5 minutes..."
+  time.sleep(300)
+  connectAndJoin()
+  inputLoop()
 
 
 
