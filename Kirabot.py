@@ -40,6 +40,21 @@ def loadQuotes():
       else:
         quoteDatabase[len(quoteDatabase)-1] += "\n" + line
 
+def logCleaner(line):
+  m = re.split('(\d{2}:\d{2}:\d{2})\s:(\w*)!(~\S*)\s(\S*)\s', line)
+  # print "Time = ", m[1]
+  # print "Nick = ", m[2]
+  # print "IP = ", m[3]
+  # print "Command = ", m[4]
+  if len(m) < 4:
+    cleanLine = line
+  elif m[4] == "PRIVMSG":
+    n = re.split("(.*)\sPRIVMSG (#\S{0,10})\s:(.*)", line)
+    cleanLine = "("+ m[1]+")" + " | " + m[2] + ": " + n[3]
+    #n[1] should be the stuff before privmsg, n[2] should be the channel, n[3] should be the text.
+  else:
+    cleanLine = "("+m[1]+")"+" | "+m[2] + " " + m[4]
+  return cleanLine
 
 ### IRC stuff
 
@@ -51,10 +66,12 @@ def tryGettingInput(callback):
   try:
     text=irc.recv(2040) # wait for the next bit of input from the IRC server. Limit to 2040 characters.
     # (the rest would stay in the buffer and get processed afterwards, I think)
-    logHelperList.append(time.strftime("%H:%M:%S ") + text)
+    timestampedLine = time.strftime("%H:%M:%S ") + text
+    cleanLine = logCleaner(timestampedLine)
+    print cleanLine
+    logHelperList.append(cleanLine)
     if len(logHelperList) > 10:
       logHelperList = logAList(logHelperList)
-    print time.strftime("%H:%M:%S ") + text
     # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
     if text.find('PING') != -1: # if there is a "PING" anywhere in the text
       sendIrcCommand('PONG ' + text.split()[1] + '\r\n')
@@ -133,7 +150,7 @@ def processInput(text):
   # process a line of text from the IRC server.
   global channel
   global userDictionary
-
+  global logHelperList
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
   firstAndRest = getFirstWordAndRest(text)
@@ -195,6 +212,17 @@ def processInput(text):
   	sendMsg('( •_•)    ( •_•)>⌐■-■    (⌐■_■)')
   elif firstWord == 'userProperty':
     printUserProperty(userDictionary, restOfText, chan)
+  elif firstWord == '!dump':
+    logAList(logHelperList)
+    sendMsg("Saved the log up to now!")
+  elif firstWord == 'catchMeUp' or firstWord == "catchmeup":
+    logAList(logHelperList)
+    n = int(restOfText)
+    if n>60:
+      sendMsg("Too many lines. Here's 60.", username)
+      n = 60
+    listToSay = openTodaysLogAndGrabNLines(n)
+    readListSlowly(listToSay, userName)
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
@@ -441,6 +469,12 @@ def buildMode(userDictionary):
     elif command == "alt":
     	server = "efnet.portlane.se"
     	port = 9999
+    elif command == "name":
+      botnick = raw_input("What nickname?")
+    elif command == "channel":
+      channel = raw_input("What channel?")
+
+
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):
@@ -468,6 +502,37 @@ def logAList(listToLog):
   listToLog = []
   logFile.close()
   return listToLog
+
+def openTodaysLogAndGrabNLines(n):
+## will return a list with n entries, where n is the number of lines from the most recent log. 
+  ## figures out the current log's name
+  ## to do - dump before you invoke this method. easy to do.
+  path = os.path.join(os.path.abspath("."), "logs")
+  fileName = time.strftime("%m_%d_%Y") + "_LOG.txt"
+  fullName = os.path.join(path, fileName)
+  todaysLog = open(fullName, 'rb+')
+  logAsAList = []
+  for line in todaysLog:
+    logAsAList.append(line)
+
+  listOfNLines = []
+  while n > 0:
+    listOfNLines.append(logAsAList[-n])
+    n = n-1
+
+
+  print listOfNLines
+  return listOfNLines
+
+def readListSlowly(listOfNLines, userName):
+  for line in listOfNLines:
+    sendMsg(line, userName)
+    #might be cool to wait longer on longer lines
+    #howLongToWait = len(line)
+    time.sleep(1)
+
+
+
 
 ### main
 
