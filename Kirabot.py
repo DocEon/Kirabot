@@ -15,7 +15,8 @@ from random import randrange
 
 ### global variables (with defaults that will likely be overridden)
 
-
+os.environ['TZ'] = 'EST+05EDT,M4.1.0,M10.5.0'
+time.tzset()
 quoteDatabase = [""]
 server = "irc.choopa.net"
 port = 9999
