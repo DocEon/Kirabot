@@ -8,10 +8,8 @@ import time
 import re
 import json
 import os.path
+#import httplib, urllib, urllib2
 from random import randrange
-
-# To fix the bug, Ken, you just need to test to see if the first word of text in tryGettingInput (line52) is "ERROR". 
-# If it is, then you can just quit the program with an error. Or, better, go into error-handling mode where you wait ten minutes and then try again. 
 
 ### global variables (with defaults that will likely be overridden)
 
@@ -27,6 +25,8 @@ irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
 userDictionary = {}
 logHelperList = []
+copyLogs = False
+logCopyDirectory = ""
 ### Quotes database
 
 
@@ -43,10 +43,6 @@ def loadQuotes():
 
 def logCleaner(line):
   m = re.split('(\d{2}:\d{2}:\d{2})\s:(\w*)!(~\S*)\s(\S*)\s', line)
-  # print "Time = ", m[1]
-  # print "Nick = ", m[2]
-  # print "IP = ", m[3]
-  # print "Command = ", m[4]
   if len(m) < 4:
     cleanLine = line
   elif m[4] == "PRIVMSG":
@@ -56,6 +52,24 @@ def logCleaner(line):
   else:
     cleanLine = "("+m[1]+")"+" | "+m[2] + " " + m[4]
   return cleanLine
+
+# def postToPastebin(stringToPrint):
+#   # todo here: pick one pastebin and edit it rather than making a new one every time, so I don't hit the pastebin daily limit thing. Also, I need to figure out how to print the url. -wat-.
+#   url = "http://pastebin.com/api/api_post.php"
+#   datalist = ['butts', 'butts', 'butts']
+#   values = {"api_dev_key":"3c966b1bb1b6fc04a927b90d66afb83a", "api_option":"paste", "api_user_name":"doceon", "api_user_password":"tucker", "api_paste_code":stringToPrint}
+#   connection = httplib.HTTPConnection("pastebin.com/api/api_post.php")
+#   data = urllib.urlencode(values)
+#   request = urllib2.Request("http://pastebin.com/api/api_post.php", data)
+#   response = urllib2.urlopen(request)
+#   print response.read()
+#   return response.read()
+
+# def logListToString(logList):
+#   outputString = ""
+#   for line in logList:
+#     outputString = outputString + line
+#   return outputString
 
 ### IRC stuff
 
@@ -70,7 +84,8 @@ def tryGettingInput(callback):
     timestampedLine = time.strftime("%H:%M:%S ") + text
     cleanLine = logCleaner(timestampedLine)
     print cleanLine
-    logHelperList.append(cleanLine)
+    if not text.find('PING') != -1:
+      logHelperList.append(cleanLine)
     if len(logHelperList) > 10:
       logHelperList = logAList(logHelperList)
     # Prevent Timeout - this is how the IRC servers know to kick you off for inactivity, when your client doesn't PONG to a PING.
@@ -125,7 +140,6 @@ def inputLoop():
   while keepLooping < 25:
     startTime = time.time()
     tryGettingInput(processInput)
-    print("~%s seconds~" % (time.time() - startTime))
     if (time.time()-startTime) < 0.1:
       keepLooping += 1
     else:
@@ -152,6 +166,7 @@ def processInput(text):
   global channel
   global userDictionary
   global logHelperList
+  global logCopyDirectory
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
   firstAndRest = getFirstWordAndRest(text)
@@ -223,7 +238,15 @@ def processInput(text):
       sendMsg("Too many lines. Here's 60.", username)
       n = 60
     listToSay = openTodaysLogAndGrabNLines(n)
+    # # outputString = logListToString(listToSay)
+    # # url = postToPastebin(outputString)
+    # # sendMsg(url, userName)
+    # # print url
     readListSlowly(listToSay, userName)
+  elif firstWord == "todaysLog":
+    logAList(logHelperList)
+    print logCopyDirectory
+    sendMsg("Check out http://50.116.55.11/kiralogs/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.")
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
@@ -447,7 +470,7 @@ def printUserProperty(userDictionary, restOfText, chan):
 def buildMode(userDictionary):
   print "Welcome to Kirabot. Type connect to use default settings, config if you'd like to change connection settings, alt if you want to use the other server."
   command = ""
-  global server, port, channel, botnick
+  global server, port, channel, botnick, copyLogs, logCopyDirectory
   while command != "connect":
     command = raw_input("Input command:\n")
     if command == "printDictionary":
@@ -474,6 +497,9 @@ def buildMode(userDictionary):
       botnick = raw_input("What nickname?")
     elif command == "channel":
       channel = raw_input("What channel?")
+    elif command == "copyLogs":
+      copyLogs = True
+      logCopyDirectory = raw_input("Where should logs go? On linode we're looking for /srv/http/kiralogs\n")
 
 
   return userDictionary
@@ -491,6 +517,7 @@ def makeNewUser(userDictionary, userToMake):
 # listToLog = logAList(listToLog)
 
 def logAList(listToLog):
+  global logCopyDirectory
   path = os.path.join(os.path.abspath("."), "logs")
   if not os.path.exists(path):
     print "No logs folder detected. Making a new folder for logs at " + path
@@ -500,6 +527,18 @@ def logAList(listToLog):
   logFile = open(fullName, 'a')
   for i in listToLog:
     logFile.write(i + "\n")
+  if copyLogs:
+    copyPath = logCopyDirectory
+    if not os.path.exists(logCopyDirectory):
+      print "No log folder here."
+    else:
+      fullCopyName = os.path.join(logCopyDirectory, fileName)
+      logCopyFile = open(fullCopyName, 'a')
+      for i in listToLog:
+        logCopyFile.write(i + "\n")
+    
+
+
   listToLog = []
   logFile.close()
   return listToLog
@@ -520,16 +559,12 @@ def openTodaysLogAndGrabNLines(n):
   while n > 0:
     listOfNLines.append(logAsAList[-n])
     n = n-1
-
-
-  print listOfNLines
   return listOfNLines
 
 def readListSlowly(listOfNLines, userName):
   for line in listOfNLines:
     sendMsg(line, userName)
-    #might be cool to wait longer on longer lines
-    #howLongToWait = len(line)
+
     time.sleep(1)
 
 
@@ -539,21 +574,9 @@ def readListSlowly(listOfNLines, userName):
 
 def main():
   global channel, botnick
-  # process command-line arguments
-  # TODO(yanamal): look into better argument syntax?
-  #if len(sys.argv) > 1:
-  #  channel = '#' + sys.argv[1]
-  #else:
-  #  channel = raw_input('What channel would you like to join?\n')
-  
-  #if len(sys.argv) > 2:
-  #  botnick = sys.argv[2]
-  #else:
-  #  botnick = raw_input('And what nickname?\n')
     
   # load data from file(s)
   loadQuotes()
-  # load user states
 
   # start bot
   connectAndJoin()
