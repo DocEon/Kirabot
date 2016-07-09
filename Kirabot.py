@@ -8,7 +8,6 @@ import time
 import re
 import json
 import os.path
-#import httplib, urllib, urllib2
 from random import randrange
 
 ### global variables (with defaults that will likely be overridden)
@@ -27,9 +26,10 @@ userDictionary = {}
 logHelperList = []
 copyLogs = False
 logCopyDirectory = ""
+
+### TODO: Fix Kira's logging of PMs - I don' know what it's doing with msgs from private users, but I need to trace that down. 
+
 ### Quotes database
-
-
 def loadQuotes():
   global quoteDatabase
   f = open("quotes.txt", 'r')
@@ -53,24 +53,6 @@ def logCleaner(line):
     cleanLine = "("+m[1]+")"+" | "+m[2] + " " + m[4]
   return cleanLine
 
-# def postToPastebin(stringToPrint):
-#   # todo here: pick one pastebin and edit it rather than making a new one every time, so I don't hit the pastebin daily limit thing. Also, I need to figure out how to print the url. -wat-.
-#   url = "http://pastebin.com/api/api_post.php"
-#   datalist = ['butts', 'butts', 'butts']
-#   values = {"api_dev_key":"3c966b1bb1b6fc04a927b90d66afb83a", "api_option":"paste", "api_user_name":"doceon", "api_user_password":"tucker", "api_paste_code":stringToPrint}
-#   connection = httplib.HTTPConnection("pastebin.com/api/api_post.php")
-#   data = urllib.urlencode(values)
-#   request = urllib2.Request("http://pastebin.com/api/api_post.php", data)
-#   response = urllib2.urlopen(request)
-#   print response.read()
-#   return response.read()
-
-# def logListToString(logList):
-#   outputString = ""
-#   for line in logList:
-#     outputString = outputString + line
-#   return outputString
-
 ### IRC stuff
 
 
@@ -82,8 +64,11 @@ def tryGettingInput(callback):
     text=irc.recv(2040) # wait for the next bit of input from the IRC server. Limit to 2040 characters.
     # (the rest would stay in the buffer and get processed afterwards, I think)
     timestampedLine = time.strftime("%H:%M:%S ") + text
-    cleanLine = logCleaner(timestampedLine)
-    print cleanLine
+    try:
+      cleanLine = logCleaner(timestampedLine)
+      print cleanLine
+    except IndexError:
+      cleanLine = timestampedLine
     if not text.find('PING') != -1:
       logHelperList.append(cleanLine)
     if len(logHelperList) > 10:
@@ -246,7 +231,7 @@ def processInput(text):
   elif firstWord == "todaysLog":
     logAList(logHelperList)
     print logCopyDirectory
-    sendMsg("Check out http://50.116.55.11/kiralogs/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.")
+    sendMsg("Check out http://50.116.55.11/kiralogs/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.", userName)
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
@@ -256,6 +241,8 @@ def processInput(text):
 
 def sendMsg(line, chan=None):
   # send message to irc channel
+  global logHelperList
+  global botnick
   if not chan:
     chan = channel
   maxlen = 420 # max. length of message to send. Approximately size where it cuts off 
@@ -267,6 +254,9 @@ def sendMsg(line, chan=None):
       msg = el[0:cutoff]
       el = el[cutoff:]
       sendIrcCommand('PRIVMSG '+chan+' :'+msg+' \r\n')
+      newLine = "(" + time.strftime("%H:%M:%S") + ") | " + botnick + ": "+ msg
+      logHelperList.append(newLine)
+
 
 
 ## Generic input message handling
@@ -500,8 +490,6 @@ def buildMode(userDictionary):
     elif command == "copyLogs":
       copyLogs = True
       logCopyDirectory = raw_input("Where should logs go? On linode we're looking for /srv/http/kiralogs\n")
-
-
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):
@@ -566,8 +554,6 @@ def readListSlowly(listOfNLines, userName):
     sendMsg(line, userName)
 
     time.sleep(1)
-
-
 
 
 ### main
