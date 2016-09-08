@@ -45,7 +45,7 @@ def loadQuotes():
 
 def loadLogs():
   global logDictionary
-  listOfLogs = glob.glob(logCopyDirectory + "\*.txt")
+  listOfLogs = glob.glob(logCopyDirectory+"/"+"*.txt")
   for log in listOfLogs:
     newList = [""]
     if log.find("results.txt") == -1:
@@ -527,6 +527,12 @@ def buildMode(userDictionary):
     elif command == "printResults":
       for line in resultList:
         print line
+    elif command == "quickstart":
+      copyLogs = True
+      logCopyDirectory = "/srv/http/kiralogs"
+      loadLogs()
+      server = "efnet.portlane.se"
+      port = 9999
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):
