@@ -72,8 +72,12 @@ def logSearch(stringToFind):
 def writeSearchResultsToFile(resultDictionary):
   fullFileName = os.path.join(logCopyDirectory, "results.txt")
   resultFile = open(fullFileName, 'w')
-  for key in resultDictionary:
-    resultFile.write("Results from " + key + ":\n")
+  listOfKeys = resultDictionary.keys()
+  listOfKeys.sort()
+  for key in listOfKeys:
+    fileName = re.search('(\d+_\d+_\d+_LOG.txt)', key)
+    realFileName = fileName.group(0)
+    resultFile.write("Results from http://50.116.55.11/kiralogs/" + realFileName + ":\n")
     for line in resultDictionary[key]:
       resultFile.write(line + "\n")
     resultFile.write("~~~~~~~~~~\n")
