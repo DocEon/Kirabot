@@ -8,6 +8,7 @@ import time
 import re
 import json
 import os.path
+import glob
 from random import randrange
 
 ### global variables (with defaults that will likely be overridden)
@@ -26,6 +27,7 @@ userDictionary = {}
 logHelperList = []
 copyLogs = False
 logCopyDirectory = ""
+logDictionary = {}
 
 ### TODO: Fix Kira's logging of PMs - I don' know what it's doing with msgs from private users, but I need to trace that down. 
 
@@ -40,6 +42,41 @@ def loadQuotes():
           quoteDatabase.append("")
       else:
         quoteDatabase[len(quoteDatabase)-1] += "\n" + line
+
+def loadLogs():
+  global logDictionary
+  listOfLogs = glob.glob(logCopyDirectory + "\*.txt")
+  for log in listOfLogs:
+    newList = [""]
+    if log.find("results.txt") == -1:
+      f = open(log, 'r')
+      for line in f:
+        newList.append(line)
+      logDictionary[log] = newList
+
+def logSearch(stringToFind):
+  resultDictionary = {}
+  resultList = []
+  for key in logDictionary:
+    for line in logDictionary[key]:
+      if (line.lower()).find(stringToFind.lower()) != -1:
+        resultList.append(line)
+    if len(resultList) > 0:
+      resultDictionary[key] = resultList
+      # should be filename rather than key - or, better yet, url.
+      resultList = []
+  print "Found occurences of your string. Wrote the results to results.txt."
+  writeSearchResultsToFile(resultDictionary)
+  return resultDictionary
+
+def writeSearchResultsToFile(resultDictionary):
+  fullFileName = os.path.join(logCopyDirectory, "results.txt")
+  resultFile = open(fullFileName, 'w')
+  for key in resultDictionary:
+    resultFile.write("Results from " + key + ":\n")
+    for line in resultDictionary[key]:
+      resultFile.write(line + "\n")
+    resultFile.write("~~~~~~~~~~\n")
 
 def logCleaner(line):
   m = re.split('(\d{2}:\d{2}:\d{2})\s:(\w*)!(~\S*)\s(\S*)\s', line)
@@ -193,10 +230,15 @@ def processInput(text):
     kiraquote(restOfText, chan)
   elif firstWord == 'Kirasearch':
     kirasearch(restOfText, chan)
+  elif firstWord == 'logSearch':
+      resultDictionary = logSearch(restOfText)
+      sendMsg("Results are located at http://50.116.55.11/kiralogs/results.txt", userName)
   elif firstWord == 'Kirabot,':
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
     sendMsg('>:|', chan)
+  elif firstWord == "reloadLogs":
+    loadLogs()
   elif firstWord == 'Kirahelp':
     sendMsg('Check out https://github.com/DocEon/Kirabot/blob/master/documentation.txt for a list of what I can do.')
   elif firstWord == 'wz':
@@ -216,18 +258,6 @@ def processInput(text):
   elif firstWord == '!dump':
     logAList(logHelperList)
     sendMsg("Saved the log up to now!")
-  elif firstWord == 'catchMeUp' or firstWord == "catchmeup":
-    logAList(logHelperList)
-    n = int(restOfText)
-    if n>60:
-      sendMsg("Too many lines. Here's 60.", username)
-      n = 60
-    listToSay = openTodaysLogAndGrabNLines(n)
-    # # outputString = logListToString(listToSay)
-    # # url = postToPastebin(outputString)
-    # # sendMsg(url, userName)
-    # # print url
-    readListSlowly(listToSay, userName)
   elif firstWord == "todaysLog":
     logAList(logHelperList)
     print logCopyDirectory
@@ -490,6 +520,13 @@ def buildMode(userDictionary):
     elif command == "copyLogs":
       copyLogs = True
       logCopyDirectory = raw_input("Where should logs go? On linode we're looking for /srv/http/kiralogs\n")
+      loadLogs()
+    elif command == "logSearch":
+      stringToFind = raw_input("What string are you looking for?\n")
+      resultDictionary = logSearch(stringToFind)
+    elif command == "printResults":
+      for line in resultList:
+        print line
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):
@@ -524,36 +561,9 @@ def logAList(listToLog):
       logCopyFile = open(fullCopyName, 'a')
       for i in listToLog:
         logCopyFile.write(i + "\n")
-    
-
-
   listToLog = []
   logFile.close()
   return listToLog
-
-def openTodaysLogAndGrabNLines(n):
-## will return a list with n entries, where n is the number of lines from the most recent log. 
-  ## figures out the current log's name
-  ## to do - dump before you invoke this method. easy to do.
-  path = os.path.join(os.path.abspath("."), "logs")
-  fileName = time.strftime("%m_%d_%Y") + "_LOG.txt"
-  fullName = os.path.join(path, fileName)
-  todaysLog = open(fullName, 'rb+')
-  logAsAList = []
-  for line in todaysLog:
-    logAsAList.append(line)
-
-  listOfNLines = []
-  while n > 0:
-    listOfNLines.append(logAsAList[-n])
-    n = n-1
-  return listOfNLines
-
-def readListSlowly(listOfNLines, userName):
-  for line in listOfNLines:
-    sendMsg(line, userName)
-
-    time.sleep(1)
 
 
 ### main
@@ -567,9 +577,6 @@ def main():
   # start bot
   connectAndJoin()
   inputLoop()
-
-
-
 
 if __name__ == "__main__":
   userDictionary = readUserDictionary()
