@@ -48,7 +48,7 @@ def loadLogs():
   listOfLogs = glob.glob(logCopyDirectory + "\*.txt")
   for log in listOfLogs:
     newList = [""]
-    if log.find("results.txt") != -1:
+    if log.find("results.txt") == -1:
       f = open(log, 'r')
       for line in f:
         newList.append(line)
