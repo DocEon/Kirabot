@@ -45,27 +45,36 @@ def loadQuotes():
 
 def loadLogs():
   global logDictionary
-  listOfLogs = glob.glob(logCopyDirectory+"/"+"*.txt")
-  for log in listOfLogs:
-    newList = [""]
-    if log.find("results.txt") == -1:
-      f = open(log, 'r')
+  for root, dirs, files in os.walk(logCopyDirectory, topdown=False):
+    for name in files:
+      newList = []
+      f = open(os.path.join(root, name))
       for line in f:
         newList.append(line)
-      logDictionary[log] = newList
+      logDictionary[os.path.join(root, name)] = newList
+
+#  listOfLogs = glob.glob(logCopyDirectory+"/"+"*.txt")
+#  for log in listOfLogs:
+#    newList = [""]
+#    if log.find("results.txt") == -1:
+#      f = open(log, 'r')
+#      for line in f:
+#        newList.append(line)
+#      logDictionary[log] = newList
 
 def logSearch(stringToFind):
   resultDictionary = {}
-  resultList = []
-  for key in logDictionary:
+  numberOfOccurrences = 0
+  listOfKeys = logDictionary.keys()
+  for key in listOfKeys:
+    newList = []
     for line in logDictionary[key]:
       if (line.lower()).find(stringToFind.lower()) != -1:
-        resultList.append(line)
-    if len(resultList) > 0:
-      resultDictionary[key] = resultList
-      # should be filename rather than key - or, better yet, url.
-      resultList = []
-  print "Found occurences of your string. Wrote the results to results.txt."
+        numberOfOccurrences += 1
+        newList.append(line)
+      if len(newList)>0:
+        resultDictionary[key] = newList
+  print "%s results found. Results exported to results.txt" % (numberOfOccurrences)
   writeSearchResultsToFile(resultDictionary)
   return resultDictionary
 
@@ -75,8 +84,8 @@ def writeSearchResultsToFile(resultDictionary):
   listOfKeys = resultDictionary.keys()
   listOfKeys.sort()
   for key in listOfKeys:
-    fileName = re.search('(\d+_\d+_\d+_LOG.txt)', key)
-    realFileName = fileName.group(0)
+    fileName = re.search('.*\/kiralogs\/(.*)', key)
+    realFileName = fileName.group(1)
     resultFile.write("Results from http://50.116.55.11/kiralogs/" + realFileName + ":\n")
     for line in resultDictionary[key]:
       resultFile.write(line + "\n")
