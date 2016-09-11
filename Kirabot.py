@@ -47,16 +47,17 @@ def loadLogs():
   global logDictionary
   for root, dirs, files in os.walk(logCopyDirectory, topdown=False):
     for name in files:
-      newList = []
-      f = open(os.path.join(root, name))
-      for line in f:
-        newList.append(line)
-      logDictionary[os.path.join(root, name)] = newList
+      if name.find("html") == -1:
+        newList = []
+        f = open(os.path.join(root, name))
+        for line in f:
+          newList.append(line)
+        logDictionary[os.path.join(root, name)] = newList
 
 #  listOfLogs = glob.glob(logCopyDirectory+"/"+"*.txt")
 #  for log in listOfLogs:
 #    newList = [""]
-#    if log.find("results.txt") == -1:
+#    if log.find(".txt") == -1:
 #      f = open(log, 'r')
 #      for line in f:
 #        newList.append(line)
@@ -67,29 +68,62 @@ def logSearch(stringToFind):
   numberOfOccurrences = 0
   listOfKeys = logDictionary.keys()
   for key in listOfKeys:
-    newList = []
-    for line in logDictionary[key]:
+    resultList = []
+# xrange is going from 0 to n where n is the number of lines in the list.
+    for index in xrange(len(logDictionary[key])):
+      line = (logDictionary[key])[index]
       if (line.lower()).find(stringToFind.lower()) != -1:
         numberOfOccurrences += 1
-        newList.append(line)
-      if len(newList)>0:
-        resultDictionary[key] = newList
-  print "%s results found. Results exported to results.txt" % (numberOfOccurrences)
+        if index == 0:
+          index += 1
+        try:
+          previousLine = (logDictionary[key][index - 1])
+          nextLine = (logDictionary[key][index + 1])
+        except IndexError:
+          nextLine = ""
+        resultList.append(" - ")
+        if previousLine != "":
+          resultList.append(previousLine)
+        resultList.append(line)
+        if nextLine != "":
+          resultList.append(nextLine)
+        if len(resultList) > 0:
+          resultDictionary[key] = resultList
+    
+
+#    for line in logDictionary[key]:
+#      if (line.lower()).find(stringToFind.lower()) != -1:
+#        numberOfOccurrences += 1
+#        newList.append(line)
+#      if len(newList)>0:
+#        resultDictionary[key] = resultList
+  resultDictionary["Metadata"]=[stringToFind, numberOfOccurrences]
+  print "%s results found. Results exported to results.html" % (numberOfOccurrences)
   writeSearchResultsToFile(resultDictionary)
   return resultDictionary
 
 def writeSearchResultsToFile(resultDictionary):
-  fullFileName = os.path.join(logCopyDirectory, "results.txt")
+  searchQuery = resultDictionary["Metadata"][0]
+  fullFileName = os.path.join(logCopyDirectory,"results/",(searchQuery + ".html"))
+  if os.path.isfile(fullFileName):
+    os.remove(fullFileName)
   resultFile = open(fullFileName, 'w')
   listOfKeys = resultDictionary.keys()
   listOfKeys.sort()
+  resultFile.write("<!DOCTYPE HTML><html><body><body bgcolor='black'><font color='#D5D8DC'><body link='#5DADE2' vlink ='red'><font face='consolas'><font size='2'>")
+  numberOfOccurrences = str(resultDictionary["Metadata"][1])
+  resultFile.write("<h2>Searched for "+searchQuery+". Found "+numberOfOccurrences+" results:<h2>")
   for key in listOfKeys:
     fileName = re.search('.*\/kiralogs\/(.*)', key)
+    if fileName == None:
+      break
     realFileName = fileName.group(1)
-    resultFile.write("Results from http://50.116.55.11/kiralogs/" + realFileName + ":\n")
+    resultFile.write("<h3>Results from <a href='http://50.116.55.11/kiralogs/" + realFileName + "'>" + realFileName +"</a href>:\n</h3>")
     for line in resultDictionary[key]:
-      resultFile.write(line + "\n")
-    resultFile.write("~~~~~~~~~~\n")
+      if key != "Metadata":
+        resultFile.write(line+"<br>")
+    resultFile.write("<hr>")
+  resultFile.write("</body></html>")
 
 def logCleaner(line):
   m = re.split('(\d{2}:\d{2}:\d{2})\s:(\w*)!(~\S*)\s(\S*)\s', line)
@@ -239,18 +273,18 @@ def processInput(text):
     sendMsg('Never sorting for '+userName)
   elif firstWord == 'Kirasay':
     sendMsg(restOfText, chan)
-  elif firstWord == 'Kiraquote':
+  elif firstWord.lower() == 'kiraquote':
     kiraquote(restOfText, chan)
-  elif firstWord == 'Kirasearch':
+  elif firstWord == 'Quotesearch':
     kirasearch(restOfText, chan)
-  elif firstWord == 'logSearch':
+  elif firstWord.lower() == 'kirasearch':
       resultDictionary = logSearch(restOfText)
-      sendMsg("Results are located at http://50.116.55.11/kiralogs/results.txt", userName)
+      sendMsg("You can find your results at http://50.116.55.11/kiralogs/results/"+restOfText+".html !", chan)
   elif firstWord == 'Kirabot,':
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
     sendMsg('>:|', chan)
-  elif firstWord == "reloadLogs":
+  elif firstWord.lower() == "reloadLogs":
     loadLogs()
   elif firstWord == 'Kirahelp':
     sendMsg('Check out https://github.com/DocEon/Kirabot/blob/master/documentation.txt for a list of what I can do.')
@@ -463,9 +497,11 @@ def kiraquote(restOfText, chan):
   else:
     quoteIndex = int(restOfText) # TODO: handle strange input gracefully (e.g. "Kiraquote 5 please" "Kiraquote Foo")
     sendMsg("Quote #" + str(quoteIndex) + ":", chan)
-    sendMsg(quoteDatabase[quoteIndex], chan)
+    sendMsg("\x03"+quoteDatabase[quoteIndex], chan)
 
-
+#    for line in quoteDatabase[quoteIndex]:
+#      sendMsg("^C15" + line, chan)
+   
 ### Persistent user state functionality using JSON
 
 ## to check property 'property' for user 'user', use userDictionary['user']['property']
@@ -534,9 +570,11 @@ def buildMode(userDictionary):
       copyLogs = True
       logCopyDirectory = raw_input("Where should logs go? On linode we're looking for /srv/http/kiralogs\n")
       loadLogs()
-    elif command == "logSearch":
+    elif command == "kirasearch":
+      print "wat"
       stringToFind = raw_input("What string are you looking for?\n")
       resultDictionary = logSearch(stringToFind)
+      print "Check 50.116.55.11/kiralogs/results/"+stringToFind+".html."
     elif command == "printResults":
       for line in resultList:
         print line
