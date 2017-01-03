@@ -28,7 +28,7 @@ logHelperList = []
 copyLogs = False
 logCopyDirectory = ""
 logDictionary = {}
-
+homeurl = "104.200.31.169"
 ### TODO: Fix Kira's logging of PMs - I don' know what it's doing with msgs from private users, but I need to trace that down. 
 
 ### Quotes database
@@ -118,7 +118,7 @@ def writeSearchResultsToFile(resultDictionary):
     if fileName == None:
       break
     realFileName = fileName.group(1)
-    resultFile.write("<h3>Results from <a href='http://50.116.55.11/kiralogs/" + realFileName + "'>" + realFileName +"</a href>:\n</h3>")
+    resultFile.write("<h3>Results from <a href='http://" + homeurl+ "/kiralogs/" + realFileName + "'>" + realFileName +"</a href>:\n</h3>")
     for line in resultDictionary[key]:
       if key != "Metadata":
         resultFile.write(line+"<br>")
@@ -279,7 +279,7 @@ def processInput(text):
     kirasearch(restOfText, chan)
   elif firstWord.lower() == 'kirasearch':
       resultDictionary = logSearch(restOfText)
-      sendMsg("You can find your results at http://50.116.55.11/kiralogs/results/"+restOfText+".html !", chan)
+      sendMsg("You can find your results at http://"+homeurl+"/kiralogs/results/"+restOfText+".html !", chan)
   elif firstWord == 'Kirabot,':
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
@@ -308,7 +308,7 @@ def processInput(text):
   elif firstWord == "todaysLog":
     logAList(logHelperList)
     print logCopyDirectory
-    sendMsg("Check out http://50.116.55.11/kiralogs/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.", userName)
+    sendMsg("Check out http://"+homeurl+"/kiralogs/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.", userName)
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
@@ -574,7 +574,7 @@ def buildMode(userDictionary):
       print "wat"
       stringToFind = raw_input("What string are you looking for?\n")
       resultDictionary = logSearch(stringToFind)
-      print "Check 50.116.55.11/kiralogs/results/"+stringToFind+".html."
+      print "Check "+homeurl+"/kiralogs/results/"+stringToFind+".html."
     elif command == "printResults":
       for line in resultList:
         print line
