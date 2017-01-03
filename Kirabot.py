@@ -67,7 +67,7 @@ def logSearch(stringToFind):
   resultDictionary = {}
   numberOfOccurrences = 0
   listOfKeys = logDictionary.keys()
-  for key in listOfKeys:
+ for key in listOfKeys:
     resultList = []
 # xrange is going from 0 to n where n is the number of lines in the list.
     for index in xrange(len(logDictionary[key])):
@@ -123,7 +123,7 @@ def logCleaner(line):
     cleanLine = line
   elif m[4] == "PRIVMSG":
     n = re.split("(.*)\sPRIVMSG (#\S{0,10})\s:(.*)", line)
-    cleanLine = "["+ m[1]+"] <" + m[2] + ">" + n[3]
+    cleanLine = "["+ m[1]+"] <" + m[2] + "> " + n[3]
     #n[1] should be the stuff before privmsg, n[2] should be the channel, n[3] should be the text.
   else:
     cleanLine = "["+m[1]+"] <"+m[2] + "> " + m[4]
