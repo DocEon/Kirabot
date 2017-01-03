@@ -67,7 +67,7 @@ def logSearch(stringToFind):
   resultDictionary = {}
   numberOfOccurrences = 0
   listOfKeys = logDictionary.keys()
- for key in listOfKeys:
+  for key in listOfKeys:
     resultList = []
 # xrange is going from 0 to n where n is the number of lines in the list.
     for index in xrange(len(logDictionary[key])):
