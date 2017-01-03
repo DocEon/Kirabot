@@ -28,7 +28,7 @@ logHelperList = []
 copyLogs = False
 logCopyDirectory = ""
 logDictionary = {}
-homeurl = "104.200.31.169"
+homeurl = "especiallygreatliterature.com"
 ### TODO: Fix Kira's logging of PMs - I don' know what it's doing with msgs from private users, but I need to trace that down. 
 
 ### Quotes database
@@ -89,14 +89,6 @@ def logSearch(stringToFind):
           resultList.append(nextLine)
         if len(resultList) > 0:
           resultDictionary[key] = resultList
-    
-
-#    for line in logDictionary[key]:
-#      if (line.lower()).find(stringToFind.lower()) != -1:
-#        numberOfOccurrences += 1
-#        newList.append(line)
-#      if len(newList)>0:
-#        resultDictionary[key] = resultList
   resultDictionary["Metadata"]=[stringToFind, numberOfOccurrences]
   print "%s results found. Results exported to results.html" % (numberOfOccurrences)
   writeSearchResultsToFile(resultDictionary)
@@ -131,10 +123,10 @@ def logCleaner(line):
     cleanLine = line
   elif m[4] == "PRIVMSG":
     n = re.split("(.*)\sPRIVMSG (#\S{0,10})\s:(.*)", line)
-    cleanLine = "("+ m[1]+")" + " | " + m[2] + ": " + n[3]
+    cleanLine = "["+ m[1]+"] <" + m[2] + ">" + n[3]
     #n[1] should be the stuff before privmsg, n[2] should be the channel, n[3] should be the text.
   else:
-    cleanLine = "("+m[1]+")"+" | "+m[2] + " " + m[4]
+    cleanLine = "["+m[1]+"] <"+m[2] + "> " + m[4]
   return cleanLine
 
 ### IRC stuff
@@ -279,6 +271,8 @@ def processInput(text):
     kirasearch(restOfText, chan)
   elif firstWord.lower() == 'kirasearch':
       resultDictionary = logSearch(restOfText)
+      if " " in restOfText:
+        restOfText = restOfText.replace(" ", "%20")
       sendMsg("You can find your results at http://"+homeurl+"/kiralogs/results/"+restOfText+".html !", chan)
   elif firstWord == 'Kirabot,':
   	sendIrcCommand(restOfText + "\n")
