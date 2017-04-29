@@ -20,7 +20,7 @@
         "real_name": "default"
     }, 
     "Fin": {
-        "sort": "False", 
+        "sort": "True", 
         "nickname": "Fin", 
         "real_name": "Kenneth"
     }, 
