@@ -285,6 +285,8 @@ def processInput(text):
   elif firstWord == 'wz':
   	# TODO: if the person is already an op, don't give it to them.
     sendIrcCommand("MODE "+channel +" +o "+ userName + "\n")
+  elif firstWord == 'sad':
+    sendMsg("Sad!")
   elif firstWord == 'goto':
     sendMsg("MUTE command sent to Kira @ " + channel+ ". \"t(- - t)\"")
     channel = restOfText
