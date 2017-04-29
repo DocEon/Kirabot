@@ -278,7 +278,8 @@ def processInput(text):
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
     sendMsg('>:|', chan)
-  elif firstWord.lower() == "reloadLogs":
+  elif firstWord.lower() == "reloadlogs":
+    sendMsg("Reloaded logs!")
     loadLogs()
   elif firstWord == 'Kirahelp':
     sendMsg('Check out https://github.com/DocEon/Kirabot/blob/master/documentation.txt for a list of what I can do.')
@@ -601,7 +602,7 @@ def logAList(listToLog):
     print "No logs folder detected. Making a new folder for logs at " + path
     os.makedirs(path)
   fileName = time.strftime("%m_%d_%Y") + "_LOG.txt"
-  fullName = os.path.join(path, fileName)
+  fullName = os.path.join(path, time.strftime("%Y"), fileName)
   logFile = open(fullName, 'a')
   for i in listToLog:
     logFile.write(i + "\n")
@@ -610,7 +611,7 @@ def logAList(listToLog):
     if not os.path.exists(logCopyDirectory):
       print "No log folder here."
     else:
-      fullCopyName = os.path.join(logCopyDirectory, fileName)
+      fullCopyName = os.path.join(logCopyDirectory, time.strftime("%Y"), fileName)
       logCopyFile = open(fullCopyName, 'a')
       for i in listToLog:
         logCopyFile.write(i + "\n")
