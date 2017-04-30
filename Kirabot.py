@@ -433,7 +433,7 @@ def tryRollingDice(message, user, chan=None, sort=False):
     	total = str(sum(dice)+adder)
     	sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " = <" + total + "> " + sucString), chan)
         if checkingInit == True:
-          if explanation == "":
+          if explanation.rstrip() == "":
             initTuple = (user, int(total), int(adder))
           else:
             initTuple = (explanation, int(total), int(adder))
