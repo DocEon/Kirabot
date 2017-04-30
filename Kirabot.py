@@ -314,6 +314,11 @@ def processInput(text):
   elif firstWord == '!dump':
     logAList(logHelperList)
     sendMsg("Saved the log up to now!")
+  elif firstWord.lower() == "dicesearch":
+  	resultDictionary = findDiceRolls(restOfText)
+  	if " " in restOfText:
+  	  restOfText = restOfText.replace(" ", "%20")
+  	sendMsg("Diceroll search available at http://"+homeurl+"/kiralogs/results/dicerolls/"+restOfText+".html !", chan)
   elif firstWord.lower() == "todayslog":
     logAList(logHelperList)
     print logCopyDirectory
@@ -647,6 +652,45 @@ def logAList(listToLog):
   logFile.close()
   return listToLog
 
+def findDiceRolls(username):
+  resultDictionary = {}
+  numberOfOccurrences = 0
+  listOfKeys = logDictionary.keys()
+# (16:02:56) | Kirabot: Fin,  10d10: [2, 3, 3, 3, 3, 4, 7, 8, 9, 10]
+# todo: make a list of tuples rather than raw strings, to make numerical manipulation easier.
+  diceRoll_regex = "\(\d{1,2}:\d{1,2}:\d{1,2}\) | Kirabot: "+username+",  (\d{1,6})d(\d{1,6}): \[([\d,\s]*)]"
+  for key in listOfKeys:
+    resultList = []
+# xrange is going from 0 to n where n is the number of lines in the list.
+    for index in xrange(len(logDictionary[key])):
+      line = (logDictionary[key])[index]
+      if re.match(diceRoll_regex, line):
+        numberOfOccurrences += 1
+        resultList.append(line)
+        if len(resultList) > 0:
+          resultDictionary[key] = resultList
+  resultDictionary["Metadata"]=[username, numberOfOccurrences]
+  print(username+"rolled %s times." % (numberOfOccurrences))
+  writeDicerollResultToFile(resultDictionary)
+  return resultDictionary
+
+def writeDicerollResultToFile(resultDictionary):
+  searchQuery = resultDictionary["Metadata"][0]
+  fullFileName = os.path.join(logCopyDirectory,"results/dicerolls",(searchQuery + ".html"))
+  if os.path.isfile(fullFileName):
+    os.remove(fullFileName)
+  resultFile = open(fullFileName, 'w')
+  listOfKeys = resultDictionary.keys()
+  listOfKeys.sort()
+  resultFile.write("<!DOCTYPE HTML><html><body><body bgcolor='black'><font color='#D5D8DC'><body link='#5DADE2' vlink ='red'><font face='consolas'><font size='2'>")
+  numberOfOccurrences = str(resultDictionary["Metadata"][1])
+  resultFile.write("<h2>Searched for "+searchQuery+"'s dicerolls. Found "+numberOfOccurrences+" results:<h2>")
+  for key in listOfKeys:
+    for line in resultDictionary[key]:
+      if key != "Metadata":
+        resultFile.write(line+"<br>")
+    resultFile.write("<hr>")
+  resultFile.write("</body></html>")
 
 ### main
 
