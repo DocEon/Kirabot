@@ -10,6 +10,7 @@ import json
 import os.path
 import glob
 from random import randrange
+from operator import itemgetter
 
 ### global variables (with defaults that will likely be overridden)
 
@@ -24,6 +25,8 @@ botnick = "Kirabot"
 irc_C = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #defines the socket
 irc = ssl.wrap_socket(irc_C)
 userDictionary = {}
+initList = []
+checkingInit = False
 logHelperList = []
 copyLogs = False
 logCopyDirectory = ""
@@ -228,6 +231,8 @@ def processInput(text):
   global userDictionary
   global logHelperList
   global logCopyDirectory
+  global checkingInit
+  global initList
   # try to get contents of a message
   # these functions will return emtpy things if it wasn't actually a message to the channel
   firstAndRest = getFirstWordAndRest(text)
@@ -288,6 +293,13 @@ def processInput(text):
     sendIrcCommand("MODE "+channel +" +o "+ userName + "\n")
   elif firstWord == 'sad':
     sendMsg("Sad!")
+  elif firstWord == "init":
+    sendMsg("Keeping track of init (1d10 + wits+dex+alert). Please roll init like 1d10+n Charactername. Say 'done' when everyone has rolled.")
+    initList = []
+    checkingInit = True
+  elif firstWord == "done" and checkingInit == True:
+    checkingInit = False
+    sendMsg("INIT: "+initOutput(initList))
   elif firstWord == 'goto':
     sendMsg("MUTE command sent to Kira @ " + channel+ ". \"t(- - t)\"")
     channel = restOfText
@@ -302,10 +314,10 @@ def processInput(text):
   elif firstWord == '!dump':
     logAList(logHelperList)
     sendMsg("Saved the log up to now!")
-  elif firstWord == "todaysLog":
+  elif firstWord.lower() == "todayslog":
     logAList(logHelperList)
     print logCopyDirectory
-    sendMsg("Check out http://"+homeurl+"/kiralogs/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.", userName)
+    sendMsg("Check out http://"+homeurl+"/kiralogs/"+time.strftime("%Y")+"/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.", userName)
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
   # TODO(yanamal): user preference for 'always sort and display diff result'?
@@ -410,7 +422,8 @@ def tryRollingDice(message, user, chan=None, sort=False):
     explanation = ' '.join(words[1:])+' ' # the rest of the words, joined back by spaces
     sucString = ''
     if len(words) > 1:
-      m = re.match(r'diff([0-9]+)', words[1])
+      for word in words:
+        m = re.match(r'diff([0-9]+)', word)
       if m:
         diff = int(m.group(1))
         intSuccesses = calculateSuccesses(dice, diff)
@@ -419,8 +432,23 @@ def tryRollingDice(message, user, chan=None, sort=False):
     if adder > 0:
     	total = str(sum(dice)+adder)
     	sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " = <" + total + "> " + sucString), chan)
+        if checkingInit == True:
+          if explanation == "":
+            initTuple = (user, int(total), int(adder))
+          else:
+            initTuple = (explanation, int(total), int(adder))
+          initList.append(initTuple)
     else:
-		sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " " + sucString), chan)
+      sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " " + sucString), chan)
+
+def initOutput(initList):
+  initList.sort(key=itemgetter(2), reverse=True)
+  initList.sort(key=itemgetter(1), reverse=True)
+  initString = ""
+  print initList
+  for tuple in initList:
+    initString = initString + tuple[0].rstrip() + ": " + str(tuple[1])+"; "
+  return initString
 
 def calculateSuccesses(dice, diff):
   # A botch is going to return as an int with value -1
