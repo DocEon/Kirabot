@@ -68,6 +68,8 @@ def loadLogs():
 
 def logSearch(stringToFind):
   resultDictionary = {}
+  if stringToFind[0]=='"':
+    stringToFind = stringToFind.replace('"'," ")
   numberOfOccurrences = 0
   listOfKeys = logDictionary.keys()
   for key in listOfKeys:
@@ -116,6 +118,8 @@ def writeSearchResultsToFile(resultDictionary):
     resultFile.write("<h3>Results from <a href='http://" + homeurl+ "/kiralogs/" + realFileName + "'>" + realFileName +"</a href>:\n</h3>")
     for line in resultDictionary[key]:
       if key != "Metadata":
+        line = line.replace("<","&#60")
+        line = line.replace(">","&#62")
         resultFile.write(line+"<br>")
     resultFile.write("<hr>")
   resultFile.write("</body></html>")
@@ -278,7 +282,10 @@ def processInput(text):
       resultDictionary = logSearch(restOfText)
       if " " in restOfText:
         restOfText = restOfText.replace(" ", "%20")
-      sendMsg("You can find your results at http://"+homeurl+"/kiralogs/results/"+restOfText+".html !", chan)
+      if '"' in restOfText:
+        restOfText = restOfText.replace('"',"%20")
+      print resultDictionary["Metadata"][1]
+      sendMsg("You can find your " + str(resultDictionary["Metadata"][1]) + " results at http://"+homeurl+"/kiralogs/results/"+restOfText+".html !", chan)
   elif firstWord == 'Kirabot,':
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
@@ -427,13 +434,13 @@ def tryRollingDice(message, user, chan=None, sort=False):
     explanation = ' '.join(words[1:])+' ' # the rest of the words, joined back by spaces
     sucString = ''
     if len(words) > 1:
-      for word in words:
-        m = re.match(r'diff([0-9]+)', word)
-      if m:
-        diff = int(m.group(1))
-        intSuccesses = calculateSuccesses(dice, diff)
-        sucString = successesToString(intSuccesses)
-        explanation = ' '.join(words[2:])
+     for word in words:
+       m = re.match(r'diff([0-9]+)', word)
+       if m:
+         diff = int(m.group(1))
+         intSuccesses = calculateSuccesses(dice, diff)
+         sucString = successesToString(intSuccesses)
+         explanation = ' '.join(words[2:])
     if adder > 0:
     	total = str(sum(dice)+adder)
     	sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " = <" + total + "> " + sucString), chan)
@@ -444,7 +451,10 @@ def tryRollingDice(message, user, chan=None, sort=False):
             initTuple = (explanation, int(total), int(adder))
           initList.append(initTuple)
     else:
-      sendMsg((user + ', ' + explanation + roll + ': ' + str(dice) + " " + sucString), chan)
+      if explanation.rstrip() == "":
+        sendMsg((user + " - " + roll + ": " +str(dice) + " " + sucString), chan)
+      else:    
+        sendMsg((user + ', ' + explanation + " - " + roll + ': ' + str(dice) + " " + sucString), chan)
 
 def initOutput(initList):
   initList.sort(key=itemgetter(2), reverse=True)
@@ -658,7 +668,7 @@ def findDiceRolls(username):
   listOfKeys = logDictionary.keys()
 # (16:02:56) | Kirabot: Fin,  10d10: [2, 3, 3, 3, 3, 4, 7, 8, 9, 10]
 # todo: make a list of tuples rather than raw strings, to make numerical manipulation easier.
-  diceRoll_regex = "\(\d{1,2}:\d{1,2}:\d{1,2}\) | Kirabot: "+username+",  (\d{1,6})d(\d{1,6}): \[([\d,\s]*)]"
+  diceRoll_regex = r"\(\d{1,2}:\d{1,2}:\d{1,2}\) | Kirabot: "+username+", (\d{1,6})d(\d{1,6}): \[([\d,\s]*)]"
   for key in listOfKeys:
     resultList = []
 # xrange is going from 0 to n where n is the number of lines in the list.
@@ -688,7 +698,7 @@ def writeDicerollResultToFile(resultDictionary):
   for key in listOfKeys:
     for line in resultDictionary[key]:
       if key != "Metadata":
-        resultFile.write(line+"<br>")
+        resultFile.write("<h5>"+line+"<br></h5>")
     resultFile.write("<hr>")
   resultFile.write("</body></html>")
 
