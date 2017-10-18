@@ -279,6 +279,7 @@ def processInput(text):
   elif firstWord == 'Quotesearch':
     kirasearch(restOfText, chan)
   elif firstWord.lower() == 'kirasearch':
+      loadLogs()
       resultDictionary = logSearch(restOfText)
       if " " in restOfText:
         restOfText = restOfText.replace(" ", "%20")
@@ -296,7 +297,6 @@ def processInput(text):
   elif firstWord == 'Kirahelp':
     sendMsg('Check out https://github.com/DocEon/Kirabot/blob/master/documentation.txt for a list of what I can do.')
   elif firstWord == 'wz':
-  	# TODO: if the person is already an op, don't give it to them.
     sendIrcCommand("MODE "+channel +" +o "+ userName + "\n")
   elif firstWord == 'sad':
     sendMsg("Sad!")
@@ -452,9 +452,9 @@ def tryRollingDice(message, user, chan=None, sort=False):
           initList.append(initTuple)
     else:
       if explanation.rstrip() == "":
-        sendMsg((user + " - " + roll + ": " +str(dice) + " " + sucString), chan)
+        sendMsg((user + " = " + roll + ": " +str(dice) + " " + sucString), chan)
       else:    
-        sendMsg((user + ', ' + explanation + " - " + roll + ': ' + str(dice) + " " + sucString), chan)
+        sendMsg((user + ', ' + explanation + "= " + roll + ': ' + str(dice) + " " + sucString), chan)
 
 def initOutput(initList):
   initList.sort(key=itemgetter(2), reverse=True)
