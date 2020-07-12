@@ -1,8 +1,23 @@
 {
+    "Leigh": {
+        "sort": "False", 
+        "nickname": "Leigh", 
+        "real_name": "default"
+    }, 
     "Pere": {
         "sort": "False", 
         "nickname": "Pere", 
         "real_name": "karens"
+    }, 
+    "AmyT": {
+        "sort": "False", 
+        "nickname": "AmyT", 
+        "real_name": "default"
+    }, 
+    "Fin2": {
+        "sort": "True", 
+        "nickname": "Fin2", 
+        "real_name": "default"
     }, 
     "Kestrel": {
         "sort": "True", 

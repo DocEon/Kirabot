@@ -34,6 +34,7 @@ logDictionary = {}
 homeurl = "especiallygreatliterature.com"
 ### TODO: Fix Kira's logging of PMs - I don' know what it's doing with msgs from private users, but I need to trace that down. 
 
+
 ### Quotes database
 def loadQuotes():
   global quoteDatabase
@@ -215,7 +216,7 @@ def inputLoop():
   #print "Looped too fast " + keepLooping + " times in a row. Disconnecting."
   logHelperList = logAList(logHelperList)
   print "Disconnected. Trying to reconnect in 5 minutes..."
-  time.sleep(300)
+  time.sleep(3000)
   connectAndJoin()
   inputLoop()
 
@@ -272,6 +273,8 @@ def processInput(text):
       userDictionary = makeNewUser(userDictionary, userName)
     changeUserProperty(userDictionary, userName, "sort", "False")
     sendMsg('Never sorting for '+userName)
+  elif firstWord == 'anime':
+    sendMsg("Anime belongs in the garbage, sir!")
   elif firstWord == 'Kirasay':
     sendMsg(restOfText, chan)
   elif firstWord.lower() == 'kiraquote':
@@ -291,7 +294,7 @@ def processInput(text):
   	sendIrcCommand(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
     sendMsg('>:|', chan)
-  elif firstWord.lower() == "reloadlogs":
+  elif firstWord == "reloadlogs":
     sendMsg("Reloaded logs!")
     loadLogs()
   elif firstWord == 'Kirahelp':
@@ -316,6 +319,8 @@ def processInput(text):
     # TODO: move this out into a separate function if it gets any longer.
   elif firstWord == '!shades':
   	sendMsg('( •_•)    ( •_•)>⌐■-■    (⌐■_■)')
+  elif "cowboy bebop" in message.lower():
+    sendMsg("Cowboy Bebop is good and therefore not anime, sir.")
   elif firstWord == 'userProperty':
     printUserProperty(userDictionary, restOfText, chan)
   elif firstWord == '!dump':
@@ -577,9 +582,16 @@ def printUserProperty(userDictionary, restOfText, chan):
     sendMsg("That user doesn't have a profile yet.", chan)
 
 def buildMode(userDictionary):
-  print "Welcome to Kirabot. Type connect to use default settings, config if you'd like to change connection settings, alt if you want to use the other server."
-  command = ""
   global server, port, channel, botnick, copyLogs, logCopyDirectory
+  command = ""
+  if '-q' in str(sys.argv):
+      copyLogs = True
+      logCopyDirectory = "/srv/especiallygreatliterature.com/kiralogs"
+      loadLogs()
+      server = "efnet.portlane.se"
+      port = 9999
+      command="connect"
+  print "Welcome to Kirabot. Type connect to use default settings, config if you'd like to change connection settings, alt if you want to use the other server."
   while command != "connect":
     command = raw_input("Input command:\n")
     if command == "printDictionary":
@@ -620,10 +632,19 @@ def buildMode(userDictionary):
         print line
     elif command == "quickstart":
       copyLogs = True
-      logCopyDirectory = "/srv/http/kiralogs"
+      logCopyDirectory = "/srv/especiallygreatliterature.com/kiralogs"
       loadLogs()
       server = "efnet.portlane.se"
       port = 9999
+    elif command == "server":
+      server = raw_input("What's the new server? [Type 1 for first backup server]")
+      if server == "1":
+       server = "irc.servercentral.net"
+       port = 9999
+      else:
+        port = int(raw_input("And what port do you want to use?"))
+    elif command == "kirabook":
+      print "Making an eBook."
   return userDictionary
 
 def makeNewUser(userDictionary, userToMake):

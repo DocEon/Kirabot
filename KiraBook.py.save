@@ -1,0 +1,27 @@
+import ebooklib
+from ebooklib import epub
+
+book = epub.EpubBook()
+
+# set metadata
+book.set_identifier('id01')
+book.set_title(title)
+book.set_language('en')
+
+book.add_author(author)
+
+# create chap
+
+def makeTextBook(bookdirectory):
+	
+	textBook = open(
+	for file in chapters:
+	newChapter = open(
+	currentText = open(file, 'r')
+	for line in currentChapter
+	
+
+def makeEBookFromText(biglog):
+     newBook = epub.EpubBook()
+     
+
