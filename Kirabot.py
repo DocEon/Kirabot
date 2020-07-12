@@ -335,13 +335,70 @@ def processInput(text):
     logAList(logHelperList)
     print logCopyDirectory
     sendMsg("Check out http://"+homeurl+"/kiralogs/"+time.strftime("%Y")+"/"+time.strftime("%m_%d_%Y")+"_LOG.txt for today's log.", userName)
+  elif firstWord.lower() == "characterhelp":
+    sendMsg("Start a new character with 'newcharacter maxHP maxWP maxQ'. Record damage with 'charname takes xb' or 'charname heals xa'. WP and Q works the same way with 'spends' and 'gains'. Check a character status with 'charname status.'")
+  elif firstWord.lower() == "newcharacter":
+    newCharacter(allWords[1], allWords[2], allWords[3], allWords[4])
+  elif firstWord in userDictionary:
+    if allWords[1] == "spends":
+      if len(allWords[2]) == 2:
+        qSpent = int(allWords[2][0])
+        newQ = int(userDictionary[firstWord]["tempQ"]) - qSpent
+        userDictionary = changeUserProperty(userDictionary, firstWord, "tempQ", newQ)
+        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempQ"]) + "Q")
+      elif len(allWords[2]) == 3:
+        wpSpent = int(allWords[2][0])
+        newWP = int(userDictionary[firstWord]["tempWP"]) - wpSpent
+        userDictionary = changeUserProperty(userDictionary, firstWord, "tempWP", newWP)
+        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempWP"]) + "WP")
+    elif allWords[1] == "gains":
+      if len(allWords[2]) == 2:
+        qGained = int(allWords[2][0])
+        newQ = int(userDictionary[firstWord]["tempQ"]) + qGained
+        userDictionary = changeUserProperty(userDictionary, firstWord, "tempQ", newQ)
+        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempQ"]) + "Q")
+      elif len(allWords[2]) == 3:
+        wpGained = int(allWords[2][0])
+        newWP = int(userDictionary[firstWord]["tempWP"]) + wpSpent
+        userDictionary = changeUserProperty(userDictionary, firstWord, "tempWP", newWP)
+        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempWP"]) + "WP")
+    elif allWords[1] == "takes":
+      if len(allWords[2]) == 2:
+        damage = int(allWords[2][0])
+        damtype = (allWords[2][1]).lower()
+        userDictionary = changeUserProperty(userDictionary, firstWord, damtype, userDictionary[firstWord][damtype] + damage)
+        sendMsg(firstWord + " now has " + str(userDictionary[firstWord][damtype]) + damtype.upper())
+    elif allWords[1] == "heals":
+      if len(allWords[2]) == 2:
+        damage = int(allWords[2][0])
+        damtype = (allWords[2][1]).lower()
+        userDictionary = changeUserProperty(userDictionary, firstWord, damtype, userDictionary[firstWord][damtype] - damage)
+        sendMsg(allWords[0] + " now has " + str(userDictionary[firstWord][damtype]) + damtype.upper())
+    elif allWords[1] == "status":
+      sendMsg(firstWord + " has " + str(userDictionary[firstWord]["b"]) + "B, " + str(userDictionary[firstWord]["l"]) + "L, " + str(userDictionary[firstWord]["a"]) + "A. They have " + str(userDictionary[firstWord]["tempWP"]) + " WP and " + str(userDictionary[firstWord]["tempQ"]) + "Q.") 
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
-  # TODO(yanamal): user preference for 'always sort and display diff result'?
 
 ## Message sending
 
 
+def newCharacter(charName, maxHP, maxWP, maxQ):
+  if charName not in userDictionary:
+    userDictionary[charName] = {"sort": "True", "nickname": charName, "real_name": "default"}    
+  userDictionary[charName]["maxHP"] = maxHP
+  userDictionary[charName]["b"] = 0
+  userDictionary[charName]["l"] = 0
+  userDictionary[charName]["a"] = 0
+  userDictionary[charName]["maxWP"] = maxWP
+  userDictionary[charName]["tempWP"] = int(maxWP)
+  userDictionary[charName]["maxQ"] = maxQ
+  userDictionary[charName]["tempQ"] = int(maxQ)
+  sendMsg("Stored new character " + charName + ". Type 'CharacterName status' to see their stats.")
+  writeUserDictionaryFile(userDictionary)
+  return userDictionary
+
+
+##def changeUserProperty(userDictionary, userToChange, propertyToChange, newValue):
 def sendMsg(line, chan=None):
   # send message to irc channel
   global logHelperList
@@ -360,15 +417,9 @@ def sendMsg(line, chan=None):
       newLine = "(" + time.strftime("%H:%M:%S") + ") | " + botnick + ": "+ msg
       logHelperList.append(newLine)
 
-
-
-## Generic input message handling
-
-
 def getName(line):
   # assumes format :[name]!blahblah
   return line[1:line.find('!')] 
-
 
 def getMsg(line):
   # returns the contents of a message, and the channel(or user) it was send to
@@ -394,8 +445,6 @@ def getFirstWordAndRest(line):
 
 
 ## Dice logic
-
-
 def matchDice(word):
   # returns tuple with number and sides of dice to roll, if the word is of the format 1d10.
   # if there's a + sign after the roll, it returns the number after the +; otherwise, the third number in the tuple is 0.
@@ -499,8 +548,6 @@ def successesToString(numSuc):
 
 
 ## Kirabot functionality
-
-
 def kirasearch(searchString, chan):
   # Loops through the quote array searching for a user-input string. When it finds the string,
   # it prints out that quote.

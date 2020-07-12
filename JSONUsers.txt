@@ -24,10 +24,36 @@
         "nickname": "Kestrel", 
         "real_name": "Jimmy"
     }, 
+    "Fripp": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 0, 
+        "tempWP": "8", 
+        "maxQ": "4", 
+        "l": 1, 
+        "maxWP": "8", 
+        "real_name": "default", 
+        "tempQ": "4", 
+        "maxHP": "7", 
+        "nickname": "Fripp"
+    }, 
     "Merlebird": {
         "sort": "True", 
         "nickname": "Merlebird", 
         "real_name": "default"
+    }, 
+    "adrian": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 0, 
+        "tempWP": "8", 
+        "maxQ": "2", 
+        "l": 0, 
+        "maxWP": "8", 
+        "real_name": "default", 
+        "tempQ": "2", 
+        "maxHP": "7", 
+        "nickname": "adrian"
     }, 
     "Prelate": {
         "sort": "False", 
@@ -36,8 +62,18 @@
     }, 
     "Fin": {
         "sort": "True", 
-        "nickname": "Fin", 
-        "real_name": "Kenneth"
+        "a": 0, 
+        "b": 1, 
+        "tempWP": 5, 
+        "maxQ": "3", 
+        "l": 0, 
+        "maxWP": "6", 
+        "real_name": "Kenneth", 
+        "3": 6, 
+        "2": 5, 
+        "maxHP": "7", 
+        "tempQ": 1, 
+        "nickname": "Fin"
     }, 
     "Ramc": {
         "sort": "False", 
