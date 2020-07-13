@@ -338,20 +338,20 @@ def processInput(text):
     newCharacter(allWords[1], allWords[2], allWords[3], allWords[4])
   elif firstWord in userDictionary:
     if allWords[1] == "spends":
-      if len(allWords[2]) == 2 and "q" in allWords[2]:
+      if len(allWords[2]) == 2 and "q" in allWords[2].lower():
         qSpent = int(allWords[2][0])
         newQ = int(userDictionary[firstWord]["Q"]) - qSpent
         charUpdate(firstWord, newQ, "Q", userDictionary, chan)
-      elif len(allWords[2]) == 3 and "wp" in allWords[2]:
+      elif len(allWords[2]) == 3 and "wp" in allWords[2].lower():
         wpSpent = int(allWords[2][0])
         newWP = int(userDictionary[firstWord]["WP"]) - wpSpent
         charUpdate(firstWord, newWP, "WP", userDictionary, chan)
     elif allWords[1] == "gains":
-      if len(allWords[2]) == 2 and "q" in allWords[2]:
+      if len(allWords[2]) == 2 and "q" in allWords[2].lower():
         qGained = int(allWords[2][0])
         newQ = int(userDictionary[firstWord]["Q"]) + qGained
         charUpdate(firstWord, newQ, "Q", userDictionary, chan)
-      elif len(allWords[2]) == 3 and 'wp' in allWords[2]:
+      elif len(allWords[2]) == 3 and 'wp' in allWords[2].lower():
         wpGained = int(allWords[2][0])
         newWP = int(userDictionary[firstWord]["WP"]) + wpGained
         charUpdate(firstWord, newWP, "WP", userDictionary, chan)
@@ -369,6 +369,8 @@ def processInput(text):
         charUpdate(firstWord, newDam, damtype, userDictionary, chan)
     elif allWords[1] == "status":
       charStatus(firstWord, userDictionary, chan)
+    elif allWords[1] == "topoff":
+      charTopOff(firstWord, userDictionary)
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
 
@@ -379,13 +381,22 @@ def charUpdate(charName, newValue, stat, userDictionary, destination=None):
   sendMsg(charName + " now has " + str(newValue) + stat, destination)
 
 def charStatus(charName, userDictionary, destination=None):
-  outputString = charName + "| "
+  outputString = charName + " | "
   damTypes = ["B","L","A"]
   for type in damTypes:
     if userDictionary[charName][type] != 0:
       outputString = outputString + "." + str(userDictionary[charName][type]) + type
   outputString = outputString + ". | " + str(userDictionary[charName]["WP"]) + "WP, " + str(userDictionary[charName]["Q"]) + "Q |"
   sendMsg(outputString, destination)
+
+def charTopOff(charName, userDictionary):
+  userDictionary[charName]["B"] = 0
+  userDictionary[charName]["L"] = 0
+  userDictionary[charName]["A"] = 0
+  userDictionary[charName]["WP"] = userDictionary[charName]["maxWP"]
+  userDictionary[charName]["Q"] = userDictionary[charName]["maxQ"]
+  writeUserDictionaryFile(userDictionary)
+  charStatus(charName, userDictionary)
 
 def newCharacter(charName, maxHP, maxWP, maxQ):
   if charName not in userDictionary:

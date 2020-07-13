@@ -8,9 +8,14 @@
         "l": 0, 
         "maxWP": "8", 
         "real_name": "default", 
+        "Q": 2, 
         "tempQ": 2, 
+        "B": 0, 
+        "A": 0, 
         "maxHP": "7", 
-        "nickname": "Mickey"
+        "WP": 6, 
+        "nickname": "Mickey", 
+        "L": 0
     }, 
     "Xiu_Lin": {
         "sort": "True", 
@@ -21,9 +26,14 @@
         "l": 0, 
         "maxWP": "6", 
         "real_name": "default", 
+        "Q": 0, 
         "tempQ": 0, 
+        "B": 0, 
+        "A": 0, 
         "maxHP": "7", 
-        "nickname": "Xiu_Lin"
+        "WP": 6, 
+        "nickname": "Xiu_Lin", 
+        "L": 0
     }, 
     "Leigh": {
         "sort": "False", 
@@ -35,19 +45,6 @@
         "nickname": "Pere", 
         "real_name": "karens"
     }, 
-    "Kurr": {
-        "sort": "True", 
-        "a": 0, 
-        "b": 0, 
-        "tempWP": 7, 
-        "maxQ": "3", 
-        "l": 0, 
-        "maxWP": "7", 
-        "real_name": "default", 
-        "tempQ": 3, 
-        "maxHP": "7", 
-        "nickname": "Kurr"
-    }, 
     "AmyT": {
         "sort": "False", 
         "nickname": "AmyT", 
@@ -57,6 +54,26 @@
         "sort": "True", 
         "nickname": "Fin2", 
         "real_name": "default"
+    }, 
+    "Fin": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 0, 
+        "tempWP": 1, 
+        "maxQ": "3", 
+        "l": 0, 
+        "maxWP": "7", 
+        "real_name": "Kenneth", 
+        "Q": 0, 
+        "3": 6, 
+        "2": 5, 
+        "A": 0, 
+        "maxHP": "7", 
+        "WP": 7, 
+        "tempQ": -3, 
+        "B": 1, 
+        "nickname": "Fin", 
+        "L": 3
     }, 
     "Kestrel": {
         "sort": "True", 
@@ -72,9 +89,14 @@
         "l": 1, 
         "maxWP": "8", 
         "real_name": "default", 
+        "Q": "4", 
         "tempQ": "4", 
+        "B": 2, 
+        "A": 0, 
         "maxHP": "7", 
-        "nickname": "Fripp"
+        "WP": 7, 
+        "nickname": "Fripp", 
+        "L": 5
     }, 
     "Merlebird": {
         "sort": "True", 
@@ -103,29 +125,27 @@
         "l": 3, 
         "maxWP": "8", 
         "real_name": "default", 
+        "Q": 3, 
         "tempQ": 3, 
+        "B": 0, 
+        "A": 0, 
         "maxHP": "7", 
-        "nickname": "Prelate"
+        "WP": 8, 
+        "nickname": "Prelate", 
+        "L": 0
     }, 
-    "Fin": {
+    "Kurr": {
         "sort": "True", 
         "a": 0, 
         "b": 0, 
-        "tempWP": 1, 
+        "tempWP": 7, 
         "maxQ": "3", 
         "l": 0, 
         "maxWP": "7", 
-        "real_name": "Kenneth", 
-        "Q": 2, 
-        "3": 6, 
-        "2": 5, 
-        "A": 1, 
+        "real_name": "default", 
+        "tempQ": 3, 
         "maxHP": "7", 
-        "WP": 7, 
-        "tempQ": -3, 
-        "B": 2, 
-        "nickname": "Fin", 
-        "L": 0
+        "nickname": "Kurr"
     }, 
     "Hervor": {
         "sort": "True", 
@@ -136,9 +156,14 @@
         "l": 0, 
         "maxWP": "7", 
         "real_name": "default", 
+        "Q": 1, 
         "tempQ": 1, 
+        "B": 2, 
+        "A": 0, 
         "maxHP": "7", 
-        "nickname": "Hervor"
+        "WP": 2, 
+        "nickname": "Hervor", 
+        "L": 0
     }, 
     "Ramc": {
         "sort": "False", 
