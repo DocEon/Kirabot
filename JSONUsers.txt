@@ -1,4 +1,30 @@
 {
+    "Mickey": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 0, 
+        "tempWP": 6, 
+        "maxQ": "2", 
+        "l": 0, 
+        "maxWP": "8", 
+        "real_name": "default", 
+        "tempQ": 2, 
+        "maxHP": "7", 
+        "nickname": "Mickey"
+    }, 
+    "Xiu_Lin": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 0, 
+        "tempWP": 6, 
+        "maxQ": "2", 
+        "l": 0, 
+        "maxWP": "6", 
+        "real_name": "default", 
+        "tempQ": 0, 
+        "maxHP": "7", 
+        "nickname": "Xiu_Lin"
+    }, 
     "Leigh": {
         "sort": "False", 
         "nickname": "Leigh", 
@@ -8,6 +34,19 @@
         "sort": "False", 
         "nickname": "Pere", 
         "real_name": "karens"
+    }, 
+    "Kurr": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 0, 
+        "tempWP": 7, 
+        "maxQ": "3", 
+        "l": 0, 
+        "maxWP": "7", 
+        "real_name": "default", 
+        "tempQ": 3, 
+        "maxHP": "7", 
+        "nickname": "Kurr"
     }, 
     "AmyT": {
         "sort": "False", 
@@ -57,23 +96,49 @@
     }, 
     "Prelate": {
         "sort": "False", 
-        "nickname": "Prelate", 
-        "real_name": "default"
+        "a": 0, 
+        "b": 0, 
+        "tempWP": 8, 
+        "maxQ": "3", 
+        "l": 3, 
+        "maxWP": "8", 
+        "real_name": "default", 
+        "tempQ": 3, 
+        "maxHP": "7", 
+        "nickname": "Prelate"
     }, 
     "Fin": {
         "sort": "True", 
         "a": 0, 
-        "b": 1, 
-        "tempWP": 5, 
+        "b": 0, 
+        "tempWP": 1, 
         "maxQ": "3", 
         "l": 0, 
-        "maxWP": "6", 
+        "maxWP": "7", 
         "real_name": "Kenneth", 
+        "Q": 2, 
         "3": 6, 
         "2": 5, 
+        "A": 1, 
         "maxHP": "7", 
+        "WP": 7, 
+        "tempQ": -3, 
+        "B": 2, 
+        "nickname": "Fin", 
+        "L": 0
+    }, 
+    "Hervor": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 2, 
+        "tempWP": 2, 
+        "maxQ": "4", 
+        "l": 0, 
+        "maxWP": "7", 
+        "real_name": "default", 
         "tempQ": 1, 
-        "nickname": "Fin"
+        "maxHP": "7", 
+        "nickname": "Hervor"
     }, 
     "Ramc": {
         "sort": "False", 

@@ -314,9 +314,6 @@ def processInput(text):
     sendMsg("MUTE command sent to Kira @ " + channel+ ". \"t(- - t)\"")
     channel = restOfText
     sendMsg("Unmuted in "+ channel+", sir!")
-    # TODO: give the bot memory of the channel it was in - some kind of log list would be cool. making the bot log would also be really cool
-    # and probably doable - file IO can't be impossible.
-    # TODO: move this out into a separate function if it gets any longer.
   elif firstWord == '!shades':
   	sendMsg('( •_•)    ( •_•)>⌐■-■    (⌐■_■)')
   elif "cowboy bebop" in message.lower():
@@ -341,58 +338,66 @@ def processInput(text):
     newCharacter(allWords[1], allWords[2], allWords[3], allWords[4])
   elif firstWord in userDictionary:
     if allWords[1] == "spends":
-      if len(allWords[2]) == 2:
+      if len(allWords[2]) == 2 and "q" in allWords[2]:
         qSpent = int(allWords[2][0])
-        newQ = int(userDictionary[firstWord]["tempQ"]) - qSpent
-        userDictionary = changeUserProperty(userDictionary, firstWord, "tempQ", newQ)
-        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempQ"]) + "Q")
-      elif len(allWords[2]) == 3:
+        newQ = int(userDictionary[firstWord]["Q"]) - qSpent
+        charUpdate(firstWord, newQ, "Q", userDictionary, chan)
+      elif len(allWords[2]) == 3 and "wp" in allWords[2]:
         wpSpent = int(allWords[2][0])
-        newWP = int(userDictionary[firstWord]["tempWP"]) - wpSpent
-        userDictionary = changeUserProperty(userDictionary, firstWord, "tempWP", newWP)
-        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempWP"]) + "WP")
+        newWP = int(userDictionary[firstWord]["WP"]) - wpSpent
+        charUpdate(firstWord, newWP, "WP", userDictionary, chan)
     elif allWords[1] == "gains":
-      if len(allWords[2]) == 2:
+      if len(allWords[2]) == 2 and "q" in allWords[2]:
         qGained = int(allWords[2][0])
-        newQ = int(userDictionary[firstWord]["tempQ"]) + qGained
-        userDictionary = changeUserProperty(userDictionary, firstWord, "tempQ", newQ)
-        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempQ"]) + "Q")
-      elif len(allWords[2]) == 3:
+        newQ = int(userDictionary[firstWord]["Q"]) + qGained
+        charUpdate(firstWord, newQ, "Q", userDictionary, chan)
+      elif len(allWords[2]) == 3 and 'wp' in allWords[2]:
         wpGained = int(allWords[2][0])
-        newWP = int(userDictionary[firstWord]["tempWP"]) + wpSpent
-        userDictionary = changeUserProperty(userDictionary, firstWord, "tempWP", newWP)
-        sendMsg(firstWord + " now has " + str(userDictionary[firstWord]["tempWP"]) + "WP")
+        newWP = int(userDictionary[firstWord]["WP"]) + wpGained
+        charUpdate(firstWord, newWP, "WP", userDictionary, chan)
     elif allWords[1] == "takes":
-      if len(allWords[2]) == 2:
+      if len(allWords[2]) == 2 and allWords[2][0].isdigit():
         damage = int(allWords[2][0])
-        damtype = (allWords[2][1]).lower()
-        userDictionary = changeUserProperty(userDictionary, firstWord, damtype, userDictionary[firstWord][damtype] + damage)
-        sendMsg(firstWord + " now has " + str(userDictionary[firstWord][damtype]) + damtype.upper())
+        damtype = (allWords[2][1]).upper()
+        newDam = userDictionary[firstWord][damtype] + damage
+        charUpdate(firstWord, newDam, damtype, userDictionary, chan)
     elif allWords[1] == "heals":
-      if len(allWords[2]) == 2:
+      if len(allWords[2]) == 2 and allWords[2][0].isdigit():
         damage = int(allWords[2][0])
-        damtype = (allWords[2][1]).lower()
-        userDictionary = changeUserProperty(userDictionary, firstWord, damtype, userDictionary[firstWord][damtype] - damage)
-        sendMsg(allWords[0] + " now has " + str(userDictionary[firstWord][damtype]) + damtype.upper())
+        damtype = (allWords[2][1]).upper()
+        newDam = userDictionary[firstWord][damtype] - damage
+        charUpdate(firstWord, newDam, damtype, userDictionary, chan)
     elif allWords[1] == "status":
-      sendMsg(firstWord + " has " + str(userDictionary[firstWord]["b"]) + "B, " + str(userDictionary[firstWord]["l"]) + "L, " + str(userDictionary[firstWord]["a"]) + "A. They have " + str(userDictionary[firstWord]["tempWP"]) + " WP and " + str(userDictionary[firstWord]["tempQ"]) + "Q.") 
+      charStatus(firstWord, userDictionary, chan)
   else: # try to find a dice roll
     tryRollingDice(message, userName, chan)
 
 ## Message sending
 
+def charUpdate(charName, newValue, stat, userDictionary, destination=None):
+  userDictionary = changeUserProperty(userDictionary, charName, stat, newValue)
+  sendMsg(charName + " now has " + str(newValue) + stat, destination)
+
+def charStatus(charName, userDictionary, destination=None):
+  outputString = charName + "| "
+  damTypes = ["B","L","A"]
+  for type in damTypes:
+    if userDictionary[charName][type] != 0:
+      outputString = outputString + "." + str(userDictionary[charName][type]) + type
+  outputString = outputString + ". | " + str(userDictionary[charName]["WP"]) + "WP, " + str(userDictionary[charName]["Q"]) + "Q |"
+  sendMsg(outputString, destination)
 
 def newCharacter(charName, maxHP, maxWP, maxQ):
   if charName not in userDictionary:
     userDictionary[charName] = {"sort": "True", "nickname": charName, "real_name": "default"}    
   userDictionary[charName]["maxHP"] = maxHP
-  userDictionary[charName]["b"] = 0
-  userDictionary[charName]["l"] = 0
-  userDictionary[charName]["a"] = 0
+  userDictionary[charName]["B"] = 0
+  userDictionary[charName]["L"] = 0
+  userDictionary[charName]["A"] = 0
   userDictionary[charName]["maxWP"] = maxWP
-  userDictionary[charName]["tempWP"] = int(maxWP)
+  userDictionary[charName]["WP"] = int(maxWP)
   userDictionary[charName]["maxQ"] = maxQ
-  userDictionary[charName]["tempQ"] = int(maxQ)
+  userDictionary[charName]["Q"] = int(maxQ)
   sendMsg("Stored new character " + charName + ". Type 'CharacterName status' to see their stats.")
   writeUserDictionaryFile(userDictionary)
   return userDictionary
@@ -487,6 +492,12 @@ def tryRollingDice(message, user, chan=None, sort=False):
     # * diff = sides/2+1 # assume diff6 by default (for d10, diff11 for d20, etc.)
     explanation = ' '.join(words[1:])+' ' # the rest of the words, joined back by spaces
     sucString = ''
+    if "wp" in message:
+      if user in userDictionary:
+        if "WP" in userDictionary[user].keys():
+          newWP = userDictionary[user]["WP"] - 1
+          userDictionary = changeUserProperty(userDictionary, user, "WP", newWP)
+          sendMsg(user + " spends 1WP, now has " + str(newWP) + "WP.")
     if len(words) > 1:
      for word in words:
        m = re.match(r'diff([0-9]+)', word)
