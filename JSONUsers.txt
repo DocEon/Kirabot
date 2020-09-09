@@ -13,7 +13,7 @@
         "B": 0, 
         "A": 0, 
         "maxHP": "7", 
-        "WP": 6, 
+        "WP": 5, 
         "nickname": "Mickey", 
         "L": 0
     }, 
@@ -31,9 +31,9 @@
         "B": 0, 
         "A": 0, 
         "maxHP": "7", 
-        "WP": 6, 
+        "WP": 4, 
         "nickname": "Xiu_Lin", 
-        "L": 0
+        "L": 1
     }, 
     "Leigh": {
         "sort": "False", 
@@ -74,6 +74,19 @@
         "B": 1, 
         "nickname": "Fin", 
         "L": 3
+    }, 
+    "Amy": {
+        "sort": "True", 
+        "A": 0, 
+        "B": 0, 
+        "maxQ": "4", 
+        "L": 1, 
+        "maxWP": "7", 
+        "real_name": "default", 
+        "Q": 2, 
+        "WP": 1, 
+        "maxHP": "7", 
+        "nickname": "Amy"
     }, 
     "Kestrel": {
         "sort": "True", 
@@ -156,12 +169,12 @@
         "l": 0, 
         "maxWP": "7", 
         "real_name": "default", 
-        "Q": 1, 
+        "Q": 0, 
         "tempQ": 1, 
-        "B": 2, 
+        "B": 1, 
         "A": 0, 
         "maxHP": "7", 
-        "WP": 2, 
+        "WP": 0, 
         "nickname": "Hervor", 
         "L": 0
     }, 
