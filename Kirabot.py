@@ -653,6 +653,9 @@ def printUserProperty(userDictionary, restOfText, chan):
 def buildMode(userDictionary):
   global server, port, channel, botnick, copyLogs, logCopyDirectory
   command = ""
+  copyLogs = True
+  logCopyDictionary = "/srv/especiallygreatliterature.com/kiralogs"
+  loadLogs()
   if '-q' in str(sys.argv):
       copyLogs = True
       logCopyDirectory = "/srv/especiallygreatliterature.com/kiralogs"

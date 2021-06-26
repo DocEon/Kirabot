@@ -31,9 +31,9 @@
         "B": 0, 
         "A": 0, 
         "maxHP": "7", 
-        "WP": 4, 
+        "WP": 3, 
         "nickname": "Xiu_Lin", 
-        "L": 1
+        "L": 0
     }, 
     "Leigh": {
         "sort": "False", 
@@ -45,6 +45,19 @@
         "nickname": "Pere", 
         "real_name": "karens"
     }, 
+    "Kurr": {
+        "sort": "True", 
+        "a": 0, 
+        "b": 0, 
+        "tempWP": 7, 
+        "maxQ": "3", 
+        "l": 0, 
+        "maxWP": "7", 
+        "real_name": "default", 
+        "tempQ": 3, 
+        "maxHP": "7", 
+        "nickname": "Kurr"
+    }, 
     "AmyT": {
         "sort": "False", 
         "nickname": "AmyT", 
@@ -54,26 +67,6 @@
         "sort": "True", 
         "nickname": "Fin2", 
         "real_name": "default"
-    }, 
-    "Fin": {
-        "sort": "True", 
-        "a": 0, 
-        "b": 0, 
-        "tempWP": 1, 
-        "maxQ": "3", 
-        "l": 0, 
-        "maxWP": "7", 
-        "real_name": "Kenneth", 
-        "Q": 0, 
-        "3": 6, 
-        "2": 5, 
-        "A": 0, 
-        "maxHP": "7", 
-        "WP": 7, 
-        "tempQ": -3, 
-        "B": 1, 
-        "nickname": "Fin", 
-        "L": 3
     }, 
     "Amy": {
         "sort": "True", 
@@ -147,18 +140,25 @@
         "nickname": "Prelate", 
         "L": 0
     }, 
-    "Kurr": {
+    "Fin": {
         "sort": "True", 
         "a": 0, 
         "b": 0, 
-        "tempWP": 7, 
+        "tempWP": 1, 
         "maxQ": "3", 
         "l": 0, 
         "maxWP": "7", 
-        "real_name": "default", 
-        "tempQ": 3, 
+        "real_name": "Kenneth", 
+        "Q": 0, 
+        "3": 6, 
+        "2": 5, 
+        "A": 0, 
         "maxHP": "7", 
-        "nickname": "Kurr"
+        "WP": 3, 
+        "tempQ": -3, 
+        "B": 1, 
+        "nickname": "Fin", 
+        "L": 3
     }, 
     "Hervor": {
         "sort": "True", 
@@ -174,7 +174,7 @@
         "B": 1, 
         "A": 0, 
         "maxHP": "7", 
-        "WP": 0, 
+        "WP": 5, 
         "nickname": "Hervor", 
         "L": 0
     }, 
