@@ -3,15 +3,18 @@ import irc.strings
 import re
 from random import randrange
 from dice import *
+from logs import *
 
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 
 
 class TestBot(irc.bot.SingleServerIRCBot):
 
-    def __init__(self, channel, nickname, server, port=6667):
+    def __init__(self, channel, nickname, server, port=6667, log_path = "/srv/especiallygreatliterature.com/kiralogs/"):
         irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
+        self.log_dictionary = load_logs(log_path)
+        self.user_dictionary = load_user_dictionary()
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + "_")
@@ -46,11 +49,21 @@ class TestBot(irc.bot.SingleServerIRCBot):
             first_word = full_arg
 
         if first_word == "wz":
-            c.mode(user, "+o")
+            output = "+o " + user
+            c.send_raw("MODE "+"#mage" + " +o " + user)
+        elif first_word.lower() == "kirasearch" and rest_of_arg:
+            resultDictionary = log_search(rest_of_arg, self.log_dictionary)
+            if " " in rest_of_arg:
+                restOfText = rest_of_arg.replace(" ", "%20")
+            if '"' in rest_of_arg:
+                rest_of_arg = rest_of_arg.replace('"', "%20")
+            print(resultDictionary["Metadata"][1])
+            output = "You can find your " + str(resultDictionary["Metadata"][1]) + " results at http://" + "especiallygreatliterature.com" + "/kiralogs/results/" + rest_of_arg + ".html !"
+            c.privmsg("#mage", output)
         else:
-            dice_output = tryRollingDice(full_arg, user, sort=True)
+            dice_output = tryRollingDice(full_arg, user, user_dict=self.user_dictionary)
             if dice_output:
-                c.notice("#mage", (dice_output))
+                c.privmsg("#mage", (dice_output))
 
     def do_command(self, e, cmd):
         nick = e.source.nick

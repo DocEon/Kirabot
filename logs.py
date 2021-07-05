@@ -1,9 +1,19 @@
 import os
 import re
+import json
 from random import randrange
 
+result_dir = "/Users/kenalba/Documents/GitHub/Kirabot"
+
+
+def load_user_dictionary():
+  f = open('JSONUsers.txt', 'r')
+  userDictionary = json.load(f)
+  f.close()
+  return userDictionary
+
 def load_quotes():
-    global quoteDatabase
+    quoteDatabase = {}
     f = open("quotes.txt", 'r')
     for line in f:
         if line.strip() == "":
@@ -11,6 +21,8 @@ def load_quotes():
                 quoteDatabase.append("")
         else:
             quoteDatabase[len(quoteDatabase) - 1] += "\n" + line
+
+    return quoteDatabase
 
 
 def load_logs(log_dir):
@@ -59,7 +71,7 @@ def log_search(string_to_find, log_dict):
                     result_dict[key] = result_list
     result_dict["Metadata"] = [string_to_find, occurrences]
     print("%s results found. Results exported to results.html" % (occurrences))
-    write_search_results_to_file(result_dict)
+    write_search_results_to_file(result_dict, result_dir = result_dir, homeurl = "especiallygreatliterature.com")
     return result_dict
 
 
@@ -69,7 +81,7 @@ def write_search_results_to_file(result_dict, result_dir, homeurl):
     if os.path.isfile(filename):
         os.remove(filename)
     result_file = open(filename, 'w')
-    keys = result_dict.keys()
+    keys = list(result_dict.keys())
     keys.sort()
 
     result_file.write(
