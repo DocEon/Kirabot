@@ -38,7 +38,7 @@ homeurl = "especiallygreatliterature.com"
 ### Quotes database
 def loadQuotes():
   global quoteDatabase
-  f = open("quotes.txt", 'r')
+  f = open("../quotes.txt", 'r')
   currentIndex = 0
   for line in f:
       if line.strip() == "":
@@ -499,7 +499,7 @@ def tryRollingDice(message, user, chan=None, sort=False):
       # TODO: put back "SORTED"?
     words = message.split()
     roll = words[0]
-    # (KEN: default diff doesn't seem to fit most use cases) 
+    # (KEN: default diff doesn't seem to fit most use cases)
     # * diff = sides/2+1 # assume diff6 by default (for d10, diff11 for d20, etc.)
     explanation = ' '.join(words[1:])+' ' # the rest of the words, joined back by spaces
     sucString = ''
@@ -529,7 +529,7 @@ def tryRollingDice(message, user, chan=None, sort=False):
     else:
       if explanation.rstrip() == "":
         sendMsg((user + " = " + roll + ": " +str(dice) + " " + sucString), chan)
-      else:    
+      else:
         sendMsg((user + ', ' + explanation + "= " + roll + ': ' + str(dice) + " " + sucString), chan)
 
 def initOutput(initList):
@@ -623,7 +623,7 @@ def kiraquote(restOfText, chan):
 
 ## Populates dictionary userDictionary with deserialized information from the json file.
 def readUserDictionary():
-  f = open('JSONUsers.txt', 'r')
+  f = open('../JSONUsers.txt', 'r')
   userDictionary = json.load(f)
   f.close()
   return userDictionary
@@ -634,7 +634,7 @@ def changeUserProperty(userDictionary, userToChange, propertyToChange, newValue)
   return userDictionary
 
 def writeUserDictionaryFile(userDictionary):  
-  f = open('JSONUsers.txt', 'w')
+  f = open('../JSONUsers.txt', 'w')
   json.dump(userDictionary, f, indent = 4)
   f.close()
   # this gets called every time someone changes a setting. It generates a new list of all users
@@ -694,7 +694,7 @@ def buildMode(userDictionary):
       copyLogs = True
       logCopyDirectory = raw_input("Where should logs go? On linode we're looking for /srv/http/kiralogs\n")
       loadLogs()
-    elif command == "kirasearch":
+    elif command == ""kirasearch"":
       print "wat"
       stringToFind = raw_input("What string are you looking for?\n")
       resultDictionary = logSearch(stringToFind)
@@ -733,7 +733,7 @@ def makeNewUser(userDictionary, userToMake):
 
 def logAList(listToLog):
   global logCopyDirectory
-  path = os.path.join(os.path.abspath("."), "logs")
+  path = os.path.join(os.path.abspath(".."), "../logs")
   if not os.path.exists(path):
     print "No logs folder detected. Making a new folder for logs at " + path
     os.makedirs(path)
