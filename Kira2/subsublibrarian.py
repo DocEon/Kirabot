@@ -38,7 +38,7 @@ homeurl = "especiallygreatliterature.com"
 ### Quotes database
 def loadQuotes():
   global quoteDatabase
-  f = open("quotes.txt", 'r')
+  f = open("../quotes.txt", 'r')
   currentIndex = 0
   for line in f:
       if line.strip() == "":
@@ -560,7 +560,7 @@ def kiraquote(restOfText, chan):
 
 ## Populates dictionary userDictionary with deserialized information from the json file.
 def readUserDictionary():
-  f = open('JSONUsers.txt', 'r')
+  f = open('../JSONUsers.txt', 'r')
   userDictionary = json.load(f)
   f.close()
   return userDictionary
@@ -571,7 +571,7 @@ def changeUserProperty(userDictionary, userToChange, propertyToChange, newValue)
   return userDictionary
 
 def writeUserDictionaryFile(userDictionary):  
-  f = open('JSONUsers.txt', 'w')
+  f = open('../JSONUsers.txt', 'w')
   json.dump(userDictionary, f, indent = 4)
   f.close()
   # this gets called every time someone changes a setting. It generates a new list of all users
@@ -660,7 +660,7 @@ def makeNewUser(userDictionary, userToMake):
 def logAList(listToLog):
   global logCopyDirectory
   global logsEnabled
-  path = os.path.join(os.path.abspath("."), "logs")
+  path = os.path.join(os.path.abspath(".."), "../logs")
   if not os.path.exists(path):
     print "No logs folder detected. Making a new folder for logs at " + path
     os.makedirs(path)
