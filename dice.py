@@ -36,9 +36,15 @@ def tryRollingDice(message, user, user_dict = None, init_list=None, sort=False):
         dice = roll_dice(num, sides)
         # if userDatabase[user]["sort"] != "False"
         if user_dict:
-            if user_dict[user]["sort"] == "True":
-                dice.sort()
-                # TODO: put back "SORTED"?
+            try:
+                if user_dict[user]["sort"] == "True":
+                    dice.sort()
+            except KeyError:
+                print("User not found. Adding user temporarily.")
+                user_dict[user] = {}
+                user_dict["sort"] = "False"
+                user_dict["nickname"] = user
+                user_dict["real name"] = "Some schmuck."
         if sort:
             dice.sort()
         words = message.split()

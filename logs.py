@@ -31,7 +31,7 @@ def load_logs(log_dir):
         for name in files:
             if name.find("html") == -1:
                 new_list = []
-                f = open(os.path.join(root, name))
+                f = open(os.path.join(root, name), )
                 for line in f:
                     new_list.append(line)
                 log_dict[os.path.join(root, name)] = new_list
@@ -75,7 +75,7 @@ def log_search(string_to_find, log_dict):
     return result_dict
 
 
-def write_search_results_to_file(result_dict, result_dir, homeurl):
+def write_search_results_to_file(result_dict, result_dir, homeurl = "especiallygreatliterature.com"):
     query = result_dict["Metadata"][0]
     filename = os.path.join(result_dir, "results/", (query + ".html"))
     if os.path.isfile(filename):

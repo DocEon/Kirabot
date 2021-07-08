@@ -10,10 +10,13 @@ from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 
 class TestBot(irc.bot.SingleServerIRCBot):
 
-    def __init__(self, channel, nickname, server, port=6667, log_path = "/srv/especiallygreatliterature.com/kiralogs/"):
+    def __init__(self, channel, nickname, server, port=6667, log_path =""):
         irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
-#        self.log_dictionary = load_logs(log_path)
+        try:
+            self.log_dictionary = load_logs(log_path)
+        except:
+            print("Couldn't load logs.")
         self.user_dictionary = load_user_dictionary()
 
     def on_nicknameinuse(self, c, e):
@@ -117,9 +120,11 @@ def main():
     channel = sys.argv[2]
     nickname = sys.argv[3]
 
-    bot = TestBot(channel, nickname, server, port)
-    bot.start()
+    kira = TestBot(channel, nickname, server, port)
+    kira.start()
 
+def debugger_mode():
+    print("Kirabot: Face-To-Bot Interface")
 
 if __name__ == "__main__":
     main()
