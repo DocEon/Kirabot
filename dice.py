@@ -29,7 +29,7 @@ def roll_dice(num, sides):
     return rolls
 
 
-def tryRollingDice(message, user, user_dict = None, init_list=None, sort=False):
+def tryRollingDice(message, user, user_dict = None, init_list=None, sort=True):
     (num, sides, adder) = match_dice(message)
     # check for if addition is neccesary:
     if num > 0:
